@@ -9,7 +9,6 @@ const {
 } = require("discord.js");
 
 const { dungeonList, wowWords } = require("../../utils/loadJson");
-
 const { generatePassphrase, isDPSRole } = require("../../utils/utilFunctions");
 const { getEligibleComposition } = require("../../utils/dungeonLogic");
 const { sendEmbed } = require("../../utils/sendEmbed");
@@ -68,6 +67,8 @@ module.exports = {
                 },
             },
         };
+
+        const timeout = 60_000;
 
         const selectDungeon = new StringSelectMenuBuilder()
             .setCustomId("dungeons")
@@ -153,16 +154,13 @@ module.exports = {
         const userFilter = (i) => i.user.id === interaction.user.id;
 
         async function runCommandLogic() {
-            let dungeonToRun;
-            let dungeonDifficulty;
-
             try {
                 const dungeonConfirmation = await dungeonResponse.awaitMessageComponent({
                     filter: userFilter,
-                    time: 60_000,
+                    time: timeout,
                 });
 
-                dungeonToRun = dungeonConfirmation.values[0];
+                const dungeonToRun = dungeonConfirmation.values[0];
                 mainObject.embedData.dungeonName = dungeonToRun;
 
                 const difficultyResponse = await dungeonConfirmation.update({
@@ -172,10 +170,10 @@ module.exports = {
 
                 const difficultyConfirmation = await difficultyResponse.awaitMessageComponent({
                     filter: userFilter,
-                    time: 60_000,
+                    time: timeout,
                 });
 
-                dungeonDifficulty = difficultyConfirmation.values[0];
+                const dungeonDifficulty = difficultyConfirmation.values[0];
                 mainObject.embedData.dungeonDifficulty = `+${dungeonDifficulty}`;
 
                 const userRoleResponse = await difficultyConfirmation.update({
@@ -185,7 +183,7 @@ module.exports = {
 
                 const userRoleConfirmation = await userRoleResponse.awaitMessageComponent({
                     filter: userFilter,
-                    time: 60_000,
+                    time: timeout,
                 });
 
                 const userChosenRole = userRoleConfirmation.values[0];
@@ -203,7 +201,7 @@ module.exports = {
 
                 const compositionConfirmation = await compositionResponse.awaitMessageComponent({
                     filter: userFilter,
-                    time: 60_000,
+                    time: timeout,
                 });
 
                 const dungeonCompositionList = compositionConfirmation.values;
@@ -245,7 +243,7 @@ module.exports = {
 
                 const confirmCollector = dungeonResponse.createMessageComponentCollector({
                     componentType: ComponentType.Button,
-                    time: 60_000,
+                    time: timeout,
                     filter: userFilter,
                 });
 
@@ -278,7 +276,7 @@ module.exports = {
                     // Inform user about the timeout
                     await interaction.editReply({
                         content:
-                            "You did not respond in time (60s). Please try the command again if you wish to create a group.",
+                            "You did not respond in time (60s).\nPlease try the command again if you wish to create a group.",
                         ephemeral: true,
                         component: [],
                     });

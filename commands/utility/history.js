@@ -87,8 +87,6 @@ module.exports = {
                 embeds: [pastDungeonObject],
                 components: [],
             });
-
-            return;
         } catch (e) {
             // Check if the error is due to a timeout
             if (
@@ -98,7 +96,7 @@ module.exports = {
                 // Inform user about the timeout
                 await interaction.editReply({
                     content:
-                        "You did not respond in time (60s). Please try the command again if you wish to view past dungeons.",
+                        "You did not respond in time (60s).\nPlease try the command again if you wish to view past dungeons.",
                     ephemeral: true,
                     components: [], // Need to send empty components to remove the dropdown
                 });

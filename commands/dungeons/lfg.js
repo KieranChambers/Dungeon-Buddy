@@ -1,4 +1,3 @@
-const fs = require("fs");
 const {
     ActionRowBuilder,
     SlashCommandBuilder,
@@ -9,26 +8,16 @@ const {
     ButtonStyle,
 } = require("discord.js");
 
-const config = JSON.parse(fs.readFileSync("./jsonFiles/config.json", "utf8"));
-const currentSeason = config.currentSeason;
-
-const dungeonData = JSON.parse(
-    fs.readFileSync(`./dungeonData/season${currentSeason}.json`, "utf8")
-)[currentSeason];
-
-const dungeonList = [];
-for (const dungeon in dungeonData) {
-    dungeonList.push(dungeon);
-}
-
-const wowWords = JSON.parse(fs.readFileSync("./jsonFiles/wowWords.json", "utf8"));
+const { dungeonList, wowWords } = require("../../utils/loadJson");
 
 const { generatePassphrase, isDPSRole } = require("../../utils/utilFunctions");
 const { getEligibleComposition } = require("../../utils/dungeonLogic");
 const { sendEmbed } = require("../../utils/sendEmbed");
 
 module.exports = {
-    data: new SlashCommandBuilder().setName("lfg").setDescription("Post your."),
+    data: new SlashCommandBuilder()
+        .setName("lfg")
+        .setDescription("Post a message to find a group for your key."),
     async execute(interaction) {
         const mainObject = {
             roles: {

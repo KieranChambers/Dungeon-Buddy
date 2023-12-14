@@ -15,7 +15,9 @@ const { getEligibleComposition } = require("../../utils/dungeonLogic");
 const { sendEmbed } = require("../../utils/sendEmbed");
 
 module.exports = {
-    data: new SlashCommandBuilder().setName("lfg").setDescription("Post your."),
+    data: new SlashCommandBuilder()
+        .setName("lfg")
+        .setDescription("Post a message to find a group for your key."),
     async execute(interaction) {
         const mainObject = {
             roles: {

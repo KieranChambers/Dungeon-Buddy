@@ -10,7 +10,9 @@ function getCurrentSeason() {
 }
 
 function getDungeonData(currentSeason) {
-    const dungeonData = loadJSON(`./dungeonData/season${currentSeason}.json`)[currentSeason];
+    const dungeonData = loadJSON(`./jsonFiles/dungeonData/season${currentSeason}.json`)[
+        currentSeason
+    ];
 
     const dungeonList = [];
     for (const dungeon in dungeonData) {

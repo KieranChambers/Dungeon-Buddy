@@ -1,4 +1,3 @@
-const fs = require("fs");
 const {
     ActionRowBuilder,
     SlashCommandBuilder,
@@ -9,19 +8,7 @@ const {
     ButtonStyle,
 } = require("discord.js");
 
-const config = JSON.parse(fs.readFileSync("./jsonFiles/config.json", "utf8"));
-const currentSeason = config.currentSeason;
-
-const dungeonData = JSON.parse(
-    fs.readFileSync(`./dungeonData/season${currentSeason}.json`, "utf8")
-)[currentSeason];
-
-const dungeonList = [];
-for (const dungeon in dungeonData) {
-    dungeonList.push(dungeon);
-}
-
-const wowWords = JSON.parse(fs.readFileSync("./jsonFiles/wowWords.json", "utf8"));
+const { dungeonList, wowWords } = require("../../utils/loadJson");
 
 const { generatePassphrase, isDPSRole } = require("../../utils/utilFunctions");
 const { getEligibleComposition } = require("../../utils/dungeonLogic");

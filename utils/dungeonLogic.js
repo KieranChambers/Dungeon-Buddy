@@ -1,14 +1,9 @@
-const fs = require("fs");
 const {
     ActionRowBuilder,
     StringSelectMenuBuilder,
     StringSelectMenuOptionBuilder,
 } = require("discord.js");
-const config = JSON.parse(fs.readFileSync("./jsonFiles/config.json", "utf8"));
-const currentSeason = config.currentSeason;
-const dungeonData = JSON.parse(
-    fs.readFileSync(`./dungeonData/season${currentSeason}.json`, "utf8")
-)[currentSeason];
+const { dungeonData } = require("./loadJson");
 const { createButton } = require("./discordFunctions");
 const { generateRoleIcons } = require("./utilFunctions");
 

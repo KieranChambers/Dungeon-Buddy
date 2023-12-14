@@ -1,9 +1,4 @@
-const fs = require("fs");
-const config = JSON.parse(fs.readFileSync("./jsonFiles/config.json", "utf8"));
-const currentSeason = config.currentSeason;
-const dungeonData = JSON.parse(
-    fs.readFileSync(`./dungeonData/season${currentSeason}.json`, "utf8")
-)[currentSeason];
+const { dungeonData } = require("./loadJson.js");
 
 function generateRoleIcons(mainObject) {
     const roleIcons = [];

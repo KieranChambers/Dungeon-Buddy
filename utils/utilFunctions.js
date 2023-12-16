@@ -64,7 +64,7 @@ function parseRolesToTag(difficulty, requiredComposition, guildId) {
 }
 
 function addUserToRole(userId, mainObject, newRole) {
-    if (userId === "mainObject.interactionUser.userId") {
+    if (userId === mainObject.interactionUser.userId) {
         mainObject.roles.Tank.spots.push(mainObject.embedData.filledSpot);
     } else {
         // Use slice(0, 3) to select the first three roles

@@ -32,6 +32,33 @@ function getEligibleComposition(mainObject) {
     return selectComposition;
 }
 
+async function processDungeonEmbed(
+    i,
+    rolesToTag,
+    dungeon,
+    difficulty,
+    mainObject,
+    groupUtilityCollector
+) {
+    const newDungeonObject = getDungeonObject(dungeon, difficulty, mainObject);
+    if (newDungeonObject.status === "full") {
+        groupUtilityCollector.stop("full");
+        await i.update({
+            content: ``,
+            embeds: [newDungeonObject],
+            components: [],
+        });
+    } else {
+        const newEmbedButtonRow = getDungeonButtonRow(mainObject);
+
+        await i.update({
+            content: `${rolesToTag}`,
+            embeds: [newDungeonObject],
+            components: [newEmbedButtonRow],
+        });
+    }
+}
+
 function getDungeonObject(dungeon, difficulty, mainObject) {
     const listedAs = mainObject.embedData.listedAs;
     const interactionUser = mainObject.interactionUser.userId;
@@ -93,4 +120,9 @@ function getDungeonButtonRow(mainObject) {
     return embedButtonRow;
 }
 
-module.exports = { getEligibleComposition, getDungeonObject, getDungeonButtonRow };
+module.exports = {
+    getEligibleComposition,
+    processDungeonEmbed,
+    getDungeonObject,
+    getDungeonButtonRow,
+};

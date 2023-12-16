@@ -1,7 +1,7 @@
 const { ComponentType } = require("discord.js");
 const { parseRolesToTag, generateListedAsString, addUserToRole } = require("./utilFunctions");
 const { dungeonInstanceTable } = require("./loadDb");
-const { getDungeonObject, getDungeonButtonRow } = require("./dungeonLogic");
+const { processDungeonEmbed, getDungeonObject, getDungeonButtonRow } = require("./dungeonLogic");
 
 async function sendEmbed(mainObject, channel, dungeon, difficulty, requiredCompositionList) {
     // Get the roles to tag
@@ -31,47 +31,34 @@ async function sendEmbed(mainObject, channel, dungeon, difficulty, requiredCompo
         const discordUserId = `<@${i.user.id}>`;
         if (i.customId === "Tank") {
             addUserToRole(discordUserId, mainObject, "Tank");
-
-            const newDungeonObject = getDungeonObject(dungeon, difficulty, mainObject);
-            const newEmbedButtonRow = getDungeonButtonRow(mainObject);
-
-            await i.update({
-                content: `${rolesToTag}`,
-                embeds: [newDungeonObject],
-                components: [newEmbedButtonRow],
-            });
+            processDungeonEmbed(
+                i,
+                rolesToTag,
+                dungeon,
+                difficulty,
+                mainObject,
+                groupUtilityCollector
+            );
         } else if (i.customId === "Healer") {
             addUserToRole(discordUserId, mainObject, "Healer");
-
-            const newDungeonObject = getDungeonObject(dungeon, difficulty, mainObject);
-            const newEmbedButtonRow = getDungeonButtonRow(mainObject);
-
-            await i.update({
-                content: `${rolesToTag}`,
-                embeds: [newDungeonObject],
-                components: [newEmbedButtonRow],
-            });
+            processDungeonEmbed(
+                i,
+                rolesToTag,
+                dungeon,
+                difficulty,
+                mainObject,
+                groupUtilityCollector
+            );
         } else if (i.customId === "DPS") {
             addUserToRole(discordUserId, mainObject, "DPS");
-
-            const newDungeonObject = getDungeonObject(dungeon, difficulty, mainObject);
-            if (newDungeonObject.status === "full") {
-                // Passing through custom id "limit" to the collector end event
-                groupUtilityCollector.stop("limit");
-                await i.update({
-                    content: ``,
-                    embeds: [newDungeonObject],
-                    components: [],
-                });
-            } else {
-                const newEmbedButtonRow = getDungeonButtonRow(mainObject);
-
-                await i.update({
-                    content: `${rolesToTag}`,
-                    embeds: [newDungeonObject],
-                    components: [newEmbedButtonRow],
-                });
-            }
+            processDungeonEmbed(
+                i,
+                rolesToTag,
+                dungeon,
+                difficulty,
+                mainObject,
+                groupUtilityCollector
+            );
         }
     });
 
@@ -92,7 +79,7 @@ async function sendEmbed(mainObject, channel, dungeon, difficulty, requiredCompo
             } catch (err) {
                 console.error("Error editing message:", err);
             }
-        } else if (reason === "limit") {
+        } else if (reason === "full") {
             try {
                 await dungeonInstanceTable.create({
                     dungeon_name: mainObject.embedData.dungeonName,

@@ -249,13 +249,7 @@ module.exports = {
 
                 confirmCollector.on("collect", async (i) => {
                     if (i.customId === "confirm") {
-                        sendEmbed(
-                            mainObject,
-                            currentChannel,
-                            dungeonToRun,
-                            dungeonDifficulty,
-                            updatedDungeonCompositionList
-                        );
+                        sendEmbed(mainObject, currentChannel, updatedDungeonCompositionList);
 
                         await compositionConfirmation.deleteReply();
                     }

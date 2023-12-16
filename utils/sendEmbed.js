@@ -3,15 +3,21 @@ const { parseRolesToTag, generateListedAsString, addUserToRole } = require("./ut
 const { dungeonInstanceTable } = require("./loadDb");
 const { processDungeonEmbed, getDungeonObject, getDungeonButtonRow } = require("./dungeonLogic");
 
-async function sendEmbed(mainObject, channel, dungeon, difficulty, requiredCompositionList) {
+async function sendEmbed(mainObject, channel, requiredCompositionList) {
+    const { dungeonName, dungeonDifficulty } = mainObject.embedData;
+
     // Get the roles to tag
-    const rolesToTag = parseRolesToTag(difficulty, requiredCompositionList, channel.guild.id);
+    const rolesToTag = parseRolesToTag(
+        dungeonDifficulty,
+        requiredCompositionList,
+        channel.guild.id
+    );
 
     // Update the listedAs field in the mainObject
-    mainObject.embedData.listedAs = generateListedAsString(dungeon, difficulty);
+    mainObject.embedData.listedAs = generateListedAsString(dungeonName, dungeonDifficulty);
 
     // Create the object that is used to send to the embed
-    const dungeonObject = getDungeonObject(dungeon, difficulty, mainObject);
+    const dungeonObject = getDungeonObject(dungeonName, dungeonDifficulty, mainObject);
 
     // Create the button row for the embed
     const embedButtonRow = getDungeonButtonRow(mainObject);
@@ -34,8 +40,8 @@ async function sendEmbed(mainObject, channel, dungeon, difficulty, requiredCompo
             processDungeonEmbed(
                 i,
                 rolesToTag,
-                dungeon,
-                difficulty,
+                dungeonName,
+                dungeonDifficulty,
                 mainObject,
                 groupUtilityCollector
             );
@@ -44,8 +50,8 @@ async function sendEmbed(mainObject, channel, dungeon, difficulty, requiredCompo
             processDungeonEmbed(
                 i,
                 rolesToTag,
-                dungeon,
-                difficulty,
+                dungeonName,
+                dungeonDifficulty,
                 mainObject,
                 groupUtilityCollector
             );
@@ -54,8 +60,8 @@ async function sendEmbed(mainObject, channel, dungeon, difficulty, requiredCompo
             processDungeonEmbed(
                 i,
                 rolesToTag,
-                dungeon,
-                difficulty,
+                dungeonName,
+                dungeonDifficulty,
                 mainObject,
                 groupUtilityCollector
             );

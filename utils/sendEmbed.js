@@ -1,18 +1,23 @@
 const { ComponentType } = require("discord.js");
-const { parseRolesToTag, generateListedAsString, isUserInRoleLists } = require("./utilFunctions");
+const { parseRolesToTag, generateListedAsString, addUserToRole } = require("./utilFunctions");
 const { dungeonInstanceTable } = require("./loadDb");
-const { getDungeonObject, getDungeonButtonRow } = require("./dungeonLogic");
+const { processDungeonEmbed, getDungeonObject, getDungeonButtonRow } = require("./dungeonLogic");
 
-async function sendEmbed(mainObject, channel, dungeon, difficulty, requiredCompositionList) {
-    const filledSpot = mainObject.embedData.filledSpot;
+async function sendEmbed(mainObject, channel, requiredCompositionList) {
+    const { dungeonName, dungeonDifficulty } = mainObject.embedData;
+
     // Get the roles to tag
-    const rolesToTag = parseRolesToTag(difficulty, requiredCompositionList, channel.guild.id);
+    const rolesToTag = parseRolesToTag(
+        dungeonDifficulty,
+        requiredCompositionList,
+        channel.guild.id
+    );
 
     // Update the listedAs field in the mainObject
-    mainObject.embedData.listedAs = generateListedAsString(dungeon, difficulty);
+    mainObject.embedData.listedAs = generateListedAsString(dungeonName, dungeonDifficulty);
 
     // Create the object that is used to send to the embed
-    const dungeonObject = getDungeonObject(dungeon, difficulty, mainObject);
+    const dungeonObject = getDungeonObject(dungeonName, dungeonDifficulty, mainObject);
 
     // Create the button row for the embed
     const embedButtonRow = getDungeonButtonRow(mainObject);
@@ -25,98 +30,45 @@ async function sendEmbed(mainObject, channel, dungeon, difficulty, requiredCompo
 
     const groupUtilityCollector = sentEmbed.createMessageComponentCollector({
         componentType: ComponentType.Button,
-        time: 10_000, // ! Change this back from 10s to 30 minutes
-        max: requiredCompositionList.length,
+        time: 1_800_000, // Wait 30 minutes to form a group before timing out
     });
 
     groupUtilityCollector.on("collect", async (i) => {
         const discordUserId = `<@${i.user.id}>`;
         if (i.customId === "Tank") {
-            if (discordUserId === mainObject.interactionUser.userId) {
-                mainObject.roles.Tank.spots.push(filledSpot);
-            } else {
-                const alreadyInGroup = isUserInRoleLists(i, discordUserId, mainObject);
-
-                if (alreadyInGroup) {
-                    return;
-                }
-
-                mainObject.roles.Tank.spots.push(discordUserId);
-            }
-
-            mainObject.roles.Tank.disabled = true;
-
-            const newDungeonObject = getDungeonObject(dungeon, difficulty, mainObject);
-
-            const newEmbedButtonRow = getDungeonButtonRow(mainObject);
-
-            await i.update({
-                content: `${rolesToTag}`,
-                embeds: [newDungeonObject],
-                components: [newEmbedButtonRow],
-            });
+            addUserToRole(discordUserId, mainObject, "Tank");
+            processDungeonEmbed(
+                i,
+                rolesToTag,
+                dungeonName,
+                dungeonDifficulty,
+                mainObject,
+                groupUtilityCollector
+            );
         } else if (i.customId === "Healer") {
-            if (discordUserId === mainObject.interactionUser.userId) {
-                mainObject.roles.Healer.spots.push(filledSpot);
-            } else {
-                const alreadyInGroup = isUserInRoleLists(i, discordUserId, mainObject);
-
-                if (alreadyInGroup) {
-                    return;
-                }
-
-                mainObject.roles.Healer.spots.push(discordUserId);
-            }
-
-            mainObject.roles.Healer.disabled = true;
-
-            const newDungeonObject = getDungeonObject(dungeon, difficulty, mainObject);
-
-            const newEmbedButtonRow = getDungeonButtonRow(mainObject);
-
-            await i.update({
-                content: `${rolesToTag}`,
-                embeds: [newDungeonObject],
-                components: [newEmbedButtonRow],
-            });
+            addUserToRole(discordUserId, mainObject, "Healer");
+            processDungeonEmbed(
+                i,
+                rolesToTag,
+                dungeonName,
+                dungeonDifficulty,
+                mainObject,
+                groupUtilityCollector
+            );
         } else if (i.customId === "DPS") {
-            if (discordUserId === mainObject.interactionUser.userId) {
-                mainObject.roles.DPS.spots.push(filledSpot);
-            } else {
-                const alreadyInGroup = isUserInRoleLists(i, discordUserId, mainObject);
-
-                if (alreadyInGroup) {
-                    return;
-                }
-
-                mainObject.roles.DPS.spots.push(discordUserId);
-            }
-
-            if (mainObject.roles.DPS.spots.length === 3) {
-                mainObject.roles.DPS.disabled = true;
-            }
-
-            const newDungeonObject = getDungeonObject(dungeon, difficulty, mainObject);
-            if (newDungeonObject.status === "full") {
-                await i.update({
-                    content: ``,
-                    embeds: [newDungeonObject],
-                    components: [],
-                });
-            } else {
-                const newEmbedButtonRow = getDungeonButtonRow(mainObject);
-
-                await i.update({
-                    content: `${rolesToTag}`,
-                    embeds: [newDungeonObject],
-                    components: [newEmbedButtonRow],
-                });
-            }
+            addUserToRole(discordUserId, mainObject, "DPS");
+            processDungeonEmbed(
+                i,
+                rolesToTag,
+                dungeonName,
+                dungeonDifficulty,
+                mainObject,
+                groupUtilityCollector
+            );
         }
     });
 
     groupUtilityCollector.on("end", async (collected, reason) => {
-        console.log(reason);
         if (reason === "time") {
             const timedOutObject = {
                 title: "LFG TIMED OUT (30 mins) ⏰",
@@ -132,7 +84,8 @@ async function sendEmbed(mainObject, channel, dungeon, difficulty, requiredCompo
             } catch (err) {
                 console.error("Error editing message:", err);
             }
-        } else if (reason === "limit") {
+        } else if (reason === "full") {
+            // Send the finished dungeon data to the database
             try {
                 await dungeonInstanceTable.create({
                     dungeon_name: mainObject.embedData.dungeonName,

@@ -63,20 +63,34 @@ function parseRolesToTag(difficulty, requiredComposition, guildId) {
     return roleMentions;
 }
 
-function isUserInRoleLists(interaction, user, mainObject) {
-    // Use slice(0, 3) to select the first three roles
-    const firstThreeRoles = Object.values(mainObject.roles).slice(0, 3);
-    const lists = firstThreeRoles.map((role) => role.spots);
-    const userExists = lists.some((list) => list.includes(user));
-
-    if (userExists) {
-        interaction.reply({
-            content: `You are already signed up for this dungeon 🙌`,
-            ephemeral: true,
-        });
+// Disable the button if the role is full
+function updateButtonState(mainObject, roleName) {
+    const role = mainObject.roles[roleName];
+    if (roleName === "Tank" || roleName === "Healer") {
+        role.disabled = role.spots.length >= 1;
+    } else {
+        role.disabled = role.spots.length >= 3;
     }
+}
 
-    return userExists;
+function addUserToRole(userId, mainObject, newRole) {
+    if (userId === mainObject.interactionUser.userId) {
+        mainObject.roles[newRole].spots.push(mainObject.embedData.filledSpot);
+        updateButtonState(mainObject, newRole);
+    } else {
+        const firstThreeRoles = Object.entries(mainObject.roles).slice(0, 3);
+
+        for (let [roleName, roleData] of firstThreeRoles) {
+            if (roleData.spots.includes(userId)) {
+                roleData.spots.splice(roleData.spots.indexOf(userId), 1);
+                // Enable the button if the role is no longer full
+                updateButtonState(mainObject, roleName);
+            }
+        }
+
+        mainObject.roles[newRole].spots.push(userId);
+        updateButtonState(mainObject, newRole);
+    }
 }
 
 module.exports = {
@@ -85,5 +99,5 @@ module.exports = {
     generatePassphrase,
     isDPSRole,
     parseRolesToTag,
-    isUserInRoleLists,
+    addUserToRole,
 };

@@ -80,7 +80,7 @@ function getDungeonObject(dungeon, difficulty, mainObject) {
 
     const dungeonObject = {
         color: 0x3c424b,
-        title: `${dungeon} +${difficulty}  ${joinedRoleIcons}`,
+        title: `${dungeon} ${difficulty}  ${joinedRoleIcons}`,
         url: `${dungeonData[dungeon].wowheadStrategyUrl}`,
         image: { url: `${dungeonData[dungeon].bannerImageUrl}` },
         fields: [

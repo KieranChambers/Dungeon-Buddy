@@ -1,10 +1,9 @@
 const { ComponentType } = require("discord.js");
-const { parseRolesToTag, generateListedAsString, isUserInRoleLists } = require("./utilFunctions");
+const { parseRolesToTag, generateListedAsString, addUserToRole } = require("./utilFunctions");
 const { dungeonInstanceTable } = require("./loadDb");
 const { getDungeonObject, getDungeonButtonRow } = require("./dungeonLogic");
 
 async function sendEmbed(mainObject, channel, dungeon, difficulty, requiredCompositionList) {
-    const filledSpot = mainObject.embedData.filledSpot;
     // Get the roles to tag
     const rolesToTag = parseRolesToTag(difficulty, requiredCompositionList, channel.guild.id);
 
@@ -25,29 +24,15 @@ async function sendEmbed(mainObject, channel, dungeon, difficulty, requiredCompo
 
     const groupUtilityCollector = sentEmbed.createMessageComponentCollector({
         componentType: ComponentType.Button,
-        time: 10_000, // ! Change this back from 10s to 30 minutes
-        max: requiredCompositionList.length,
+        // time: 30_000, // ! Change this back from 10s to 30 minutes
     });
 
     groupUtilityCollector.on("collect", async (i) => {
         const discordUserId = `<@${i.user.id}>`;
         if (i.customId === "Tank") {
-            if (discordUserId === mainObject.interactionUser.userId) {
-                mainObject.roles.Tank.spots.push(filledSpot);
-            } else {
-                const alreadyInGroup = isUserInRoleLists(i, discordUserId, mainObject);
-
-                if (alreadyInGroup) {
-                    return;
-                }
-
-                mainObject.roles.Tank.spots.push(discordUserId);
-            }
-
-            mainObject.roles.Tank.disabled = true;
+            addUserToRole(discordUserId, mainObject, "Tank");
 
             const newDungeonObject = getDungeonObject(dungeon, difficulty, mainObject);
-
             const newEmbedButtonRow = getDungeonButtonRow(mainObject);
 
             await i.update({
@@ -56,22 +41,9 @@ async function sendEmbed(mainObject, channel, dungeon, difficulty, requiredCompo
                 components: [newEmbedButtonRow],
             });
         } else if (i.customId === "Healer") {
-            if (discordUserId === mainObject.interactionUser.userId) {
-                mainObject.roles.Healer.spots.push(filledSpot);
-            } else {
-                const alreadyInGroup = isUserInRoleLists(i, discordUserId, mainObject);
-
-                if (alreadyInGroup) {
-                    return;
-                }
-
-                mainObject.roles.Healer.spots.push(discordUserId);
-            }
-
-            mainObject.roles.Healer.disabled = true;
+            addUserToRole(discordUserId, mainObject, "Healer");
 
             const newDungeonObject = getDungeonObject(dungeon, difficulty, mainObject);
-
             const newEmbedButtonRow = getDungeonButtonRow(mainObject);
 
             await i.update({
@@ -80,24 +52,12 @@ async function sendEmbed(mainObject, channel, dungeon, difficulty, requiredCompo
                 components: [newEmbedButtonRow],
             });
         } else if (i.customId === "DPS") {
-            if (discordUserId === mainObject.interactionUser.userId) {
-                mainObject.roles.DPS.spots.push(filledSpot);
-            } else {
-                const alreadyInGroup = isUserInRoleLists(i, discordUserId, mainObject);
-
-                if (alreadyInGroup) {
-                    return;
-                }
-
-                mainObject.roles.DPS.spots.push(discordUserId);
-            }
-
-            if (mainObject.roles.DPS.spots.length === 3) {
-                mainObject.roles.DPS.disabled = true;
-            }
+            addUserToRole(discordUserId, mainObject, "DPS");
 
             const newDungeonObject = getDungeonObject(dungeon, difficulty, mainObject);
             if (newDungeonObject.status === "full") {
+                // Passing through custom id "limit" to the collector end event
+                groupUtilityCollector.stop("limit");
                 await i.update({
                     content: ``,
                     embeds: [newDungeonObject],

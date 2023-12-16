@@ -63,20 +63,48 @@ function parseRolesToTag(difficulty, requiredComposition, guildId) {
     return roleMentions;
 }
 
-function isUserInRoleLists(interaction, user, mainObject) {
-    // Use slice(0, 3) to select the first three roles
-    const firstThreeRoles = Object.values(mainObject.roles).slice(0, 3);
-    const lists = firstThreeRoles.map((role) => role.spots);
-    const userExists = lists.some((list) => list.includes(user));
+function addUserToRole(userId, mainObject, newRole) {
+    if (userId === "mainObject.interactionUser.userId") {
+        mainObject.roles.Tank.spots.push(mainObject.embedData.filledSpot);
+    } else {
+        // Use slice(0, 3) to select the first three roles
+        const firstThreeRoles = Object.entries(mainObject.roles).slice(0, 3);
 
-    if (userExists) {
-        interaction.reply({
-            content: `You are already signed up for this dungeon 🙌`,
-            ephemeral: true,
-        });
+        // Check if the user already is part of the group
+        for (let [roleName, roleData] of firstThreeRoles) {
+            if (roleData.spots.includes(userId)) {
+                // Remove the user from the previous role
+                const userIndex = roleData.spots.indexOf(userId);
+                if (userIndex > -1) {
+                    roleData.spots.splice(userIndex, 1);
+
+                    // If the previous role button was disabled, enable it
+                    if (roleName === "Tank" || roleName === "Healer") {
+                        mainObject.roles[roleName].disabled = false;
+                    } else if (roleName === "DPS" && roleData.spots.length < 3) {
+                        mainObject.roles[roleName].disabled = false;
+                    }
+                }
+            }
+        }
+        // Add the user to the new role
+        mainObject.roles[newRole].spots.push(userId);
+
+        if (mainObject.roles[newRole].spots.length === 3) {
+            mainObject.roles[newRole].disabled = true;
+        } else if (newRole === "Tank" || newRole === "Healer") {
+            mainObject.roles[newRole].disabled = true;
+        }
     }
 
-    return userExists;
+    // TODO: Think about if we need this or if a full group is enough
+    // Counting the total number of filled spots
+    // let filledSpotsCount = 0;
+    // for (let roleData of Object.values(mainObject.roles).slice(0, 3)) {
+    //     filledSpotsCount += roleData.spots.length;
+    // }
+
+    return;
 }
 
 module.exports = {
@@ -85,5 +113,5 @@ module.exports = {
     generatePassphrase,
     isDPSRole,
     parseRolesToTag,
-    isUserInRoleLists,
+    addUserToRole,
 };

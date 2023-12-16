@@ -6,7 +6,7 @@
             "+3": "20:24",
             "acronym": "AD",
             "wowheadStrategyUrl": "https://www.wowhead.com/guide/mythic-plus-dungeons/ataldazar-strategy",
-            "bannerImageUrl": "https://wow.zamimg.com/uploads/guide/header/22228.jpg",
+            "bannerImageUrl": "https://raw.githubusercontent.com/KieranChambers/Dungeon-Buddy/master/dungeonImages/Atal'Dazar.png",
             "dungeonThumbnailUrl": "https://wow.zamimg.com/images/wow/journal/ui-ej-boss-rezan.png"
         },
         "Blackrook Hold": {
@@ -15,7 +15,7 @@
             "+3": "23:24",
             "acronym": "BRH",
             "wowheadStrategyUrl": "https://www.wowhead.com/guide/mythic-plus-dungeons/black-rook-hold-strategy",
-            "bannerImageUrl": "https://wow.zamimg.com/uploads/guide/header/21792.jpg",
+            "bannerImageUrl": "https://github.com/KieranChambers/Dungeon-Buddy/blob/master/dungeonImages/Blackrook%20Hold.png?raw=true",
             "dungeonThumbnailUrl": "https://wow.zamimg.com/images/wow/journal/ui-ej-boss-illysanna-ravencrest.png"
         },
         "Darkheart Thicket": {
@@ -24,7 +24,7 @@
             "+3": "18:00",
             "acronym": "DHT",
             "wowheadStrategyUrl": "https://www.wowhead.com/guide/mythic-plus-dungeons/darkheart-thicket-strategy",
-            "bannerImageUrl": "https://wow.zamimg.com/uploads/guide/header/22226.jpg",
+            "bannerImageUrl": "https://github.com/KieranChambers/Dungeon-Buddy/blob/master/dungeonImages/Darkheart%20Thicket.png?raw=true",
             "dungeonThumbnailUrl": "https://wow.zamimg.com/images/wow/journal/ui-ej-boss-shade-of-xavius.png"
         },
         "DOTI: Galakdornd's Fall": {
@@ -33,7 +33,7 @@
             "+3": "20:24",
             "acronym": "FALL",
             "wowheadStrategyUrl": "https://www.wowhead.com/guide/mythic-plus-dungeons/dawn-of-the-infinite-strategy",
-            "bannerImageUrl": "https://wow.zamimg.com/uploads/guide/header/20703.jpg",
+            "bannerImageUrl": "https://github.com/KieranChambers/Dungeon-Buddy/blob/master/dungeonImages/DOTI:%20Galakdornd's%20Fall.png?raw=true",
             "dungeonThumbnailUrl": "https://wow.zamimg.com/images/wow/journal/ui-ej-boss-chrono-lord-deios.png"
         },
         "DOTI: Murazond's Rise": {
@@ -42,7 +42,7 @@
             "+3": "21:00",
             "acronym": "RISE",
             "wowheadStrategyUrl": "https://www.wowhead.com/guide/mythic-plus-dungeons/dawn-of-the-infinite-strategy",
-            "bannerImageUrl": "https://wow.zamimg.com/uploads/guide/header/20703.jpg",
+            "bannerImageUrl": "https://github.com/KieranChambers/Dungeon-Buddy/blob/master/dungeonImages/DOTI:%20Galakdornd's%20Fall.png?raw=true",
             "dungeonThumbnailUrl": "https://wow.zamimg.com/images/wow/journal/ui-ej-boss-chrono-lord-deios.png"
         },
         "The Everbloom": {
@@ -51,7 +51,7 @@
             "+3": "19.48",
             "acronym": "BLOOM",
             "wowheadStrategyUrl": "https://www.wowhead.com/guide/mythic-plus-dungeons/everbloom-strategy",
-            "bannerImageUrl": "https://wow.zamimg.com/uploads/guide/header/22224.jpg",
+            "bannerImageUrl": "https://github.com/KieranChambers/Dungeon-Buddy/blob/master/dungeonImages/The%20Everbloom.png?raw=true",
             "dungeonThumbnailUrl": "https://wow.zamimg.com/images/wow/journal/ui-ej-boss-yalnu.png"
         },
         "Throne of the Tides": {
@@ -60,7 +60,7 @@
             "+3": "20:24",
             "acronym": "TOT",
             "wowheadStrategyUrl": "https://www.wowhead.com/guide/mythic-plus-dungeons/throne-of-the-tides-strategy",
-            "bannerImageUrl": "https://wow.zamimg.com/uploads/guide/header/21886.jpg",
+            "bannerImageUrl": "https://github.com/KieranChambers/Dungeon-Buddy/blob/master/dungeonImages/Throne%20of%20the%20Tides.png?raw=true",
             "dungeonThumbnailUrl": "https://wow.zamimg.com/images/wow/journal/ui-ej-boss-ozumat.png"
         },
         "Waycrest Manor": {
@@ -69,7 +69,7 @@
             "+3": "22:00",
             "acronym": "WM",
             "wowheadStrategyUrl": "https://www.wowhead.com/guide/mythic-plus-dungeons/waycrest-manor-strategy",
-            "bannerImageUrl": "https://wow.zamimg.com/uploads/guide/header/21779.jpg",
+            "bannerImageUrl": "https://github.com/KieranChambers/Dungeon-Buddy/blob/master/dungeonImages/Waycrest%20Manor.png?raw=true",
             "dungeonThumbnailUrl": "https://wow.zamimg.com/images/wow/journal/ui-ej-boss-goraktul.png"
         }
     }

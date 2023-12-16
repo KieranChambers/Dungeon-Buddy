@@ -63,41 +63,34 @@ function parseRolesToTag(difficulty, requiredComposition, guildId) {
     return roleMentions;
 }
 
+// Disable the button if the role is full
+function updateButtonState(mainObject, roleName) {
+    const role = mainObject.roles[roleName];
+    if (roleName === "Tank" || roleName === "Healer") {
+        role.disabled = role.spots.length >= 1;
+    } else {
+        role.disabled = role.spots.length >= 3;
+    }
+}
+
 function addUserToRole(userId, mainObject, newRole) {
     if (userId === mainObject.interactionUser.userId) {
-        mainObject.roles.Tank.spots.push(mainObject.embedData.filledSpot);
+        mainObject.roles[newRole].spots.push(mainObject.embedData.filledSpot);
+        updateButtonState(mainObject, newRole);
     } else {
-        // Use slice(0, 3) to select the first three roles
         const firstThreeRoles = Object.entries(mainObject.roles).slice(0, 3);
 
-        // Check if the user already is part of the group
         for (let [roleName, roleData] of firstThreeRoles) {
             if (roleData.spots.includes(userId)) {
-                // Remove the user from the previous role
-                const userIndex = roleData.spots.indexOf(userId);
-                if (userIndex > -1) {
-                    roleData.spots.splice(userIndex, 1);
-
-                    // If the previous role button was disabled, enable it
-                    if (roleName === "Tank" || roleName === "Healer") {
-                        mainObject.roles[roleName].disabled = false;
-                    } else if (roleName === "DPS" && roleData.spots.length < 3) {
-                        mainObject.roles[roleName].disabled = false;
-                    }
-                }
+                roleData.spots.splice(roleData.spots.indexOf(userId), 1);
+                // Enable the button if the role is no longer full
+                updateButtonState(mainObject, roleName);
             }
         }
-        // Add the user to the new role
+
         mainObject.roles[newRole].spots.push(userId);
-
-        if (mainObject.roles[newRole].spots.length === 3) {
-            mainObject.roles[newRole].disabled = true;
-        } else if (newRole === "Tank" || newRole === "Healer") {
-            mainObject.roles[newRole].disabled = true;
-        }
+        updateButtonState(mainObject, newRole);
     }
-
-    return;
 }
 
 module.exports = {

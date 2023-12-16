@@ -30,7 +30,7 @@ async function sendEmbed(mainObject, channel, requiredCompositionList) {
 
     const groupUtilityCollector = sentEmbed.createMessageComponentCollector({
         componentType: ComponentType.Button,
-        // time: 30_000, // ! Change this back from 10s to 30 minutes
+        time: 1_800_000, // Wait 30 minutes to form a group before timing out
     });
 
     groupUtilityCollector.on("collect", async (i) => {
@@ -69,7 +69,6 @@ async function sendEmbed(mainObject, channel, requiredCompositionList) {
     });
 
     groupUtilityCollector.on("end", async (collected, reason) => {
-        console.log(reason);
         if (reason === "time") {
             const timedOutObject = {
                 title: "LFG TIMED OUT (30 mins) ⏰",
@@ -86,6 +85,7 @@ async function sendEmbed(mainObject, channel, requiredCompositionList) {
                 console.error("Error editing message:", err);
             }
         } else if (reason === "full") {
+            // Send the finished dungeon data to the database
             try {
                 await dungeonInstanceTable.create({
                     dungeon_name: mainObject.embedData.dungeonName,

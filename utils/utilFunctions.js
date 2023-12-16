@@ -97,13 +97,6 @@ function addUserToRole(userId, mainObject, newRole) {
         }
     }
 
-    // TODO: Think about if we need this or if a full group is enough
-    // Counting the total number of filled spots
-    // let filledSpotsCount = 0;
-    // for (let roleData of Object.values(mainObject.roles).slice(0, 3)) {
-    //     filledSpotsCount += roleData.spots.length;
-    // }
-
     return;
 }
 

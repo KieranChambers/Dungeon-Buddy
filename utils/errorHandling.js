@@ -1,9 +1,15 @@
+const { errorTable } = require("./loadDb");
+
 async function processError(error, interaction) {
+    let errorName = "";
     // Check if the error is due to a timeout
     if (
         error.name.includes("InteractionCollectorError") &&
         error.message.includes("Collector received no interactions")
     ) {
+        // Simpler name for a standard timeout error
+        errorName = "timeout";
+
         // Inform user about the timeout
         await interaction.editReply({
             content:
@@ -19,4 +25,13 @@ async function processError(error, interaction) {
             components: [],
         });
     }
+
+    // Send the error to the database
+    await errorTable.create({
+        error_name: errorName || error.name,
+        error_message: error.message,
+        user_id: interaction.user.id,
+    });
 }
+
+module.exports = { processError };

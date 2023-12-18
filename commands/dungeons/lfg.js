@@ -12,6 +12,7 @@ const { dungeonList, wowWords } = require("../../utils/loadJson");
 const { generatePassphrase, isDPSRole } = require("../../utils/utilFunctions");
 const { getEligibleComposition } = require("../../utils/dungeonLogic");
 const { sendEmbed } = require("../../utils/sendEmbed");
+const { interactionStatusTable } = require("../../utils/loadDb");
 const { processError } = require("../../utils/errorHandling");
 
 module.exports = {
@@ -58,6 +59,7 @@ module.exports = {
                 spotIcons: [],
                 filledSpot: "~~Filled Spot~~",
             },
+            interactionId: interaction.id,
             interactionUser: {
                 userId: `<@${interaction.user.id}>`,
                 userChosenRole: "",
@@ -253,6 +255,13 @@ module.exports = {
                         sendEmbed(mainObject, currentChannel, updatedDungeonCompositionList);
 
                         await compositionConfirmation.deleteReply();
+
+                        // Send the created dungeon status to the database
+                        await interactionStatusTable.create({
+                            interaction_id: interaction.id,
+                            interaction_user: interaction.user.id,
+                            interaction_status: "created",
+                        });
                     }
                     if (i.customId === "cancel") {
                         await interaction.editReply({
@@ -260,6 +269,12 @@ module.exports = {
                                 "Cancelled. Please try the command again if you wish to create a group.",
                             ephemeral: true,
                             components: [],
+                        });
+
+                        interactionStatusTable.create({
+                            interaction_id: interaction.id,
+                            interaction_user: interaction.user.id,
+                            interaction_status: "cancelled",
                         });
                     }
                 });

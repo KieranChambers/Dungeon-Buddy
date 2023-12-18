@@ -1,6 +1,6 @@
 const { ComponentType } = require("discord.js");
 const { parseRolesToTag, generateListedAsString, addUserToRole } = require("./utilFunctions");
-const { dungeonInstanceTable } = require("./loadDb");
+const { dungeonInstanceTable, interactionStatusTable } = require("./loadDb");
 const { processDungeonEmbed, getDungeonObject, getDungeonButtonRow } = require("./dungeonLogic");
 
 async function sendEmbed(mainObject, channel, requiredCompositionList) {
@@ -81,6 +81,12 @@ async function sendEmbed(mainObject, channel, requiredCompositionList) {
                     embeds: [timedOutObject],
                     components: [],
                 });
+
+                // Update the interaction status to "timed out"
+                await interactionStatusTable.update(
+                    { interaction_status: "timed out" },
+                    { where: { interaction_id: mainObject.interactionId } }
+                );
             } catch (err) {
                 console.error("Error editing message:", err);
             }
@@ -98,6 +104,12 @@ async function sendEmbed(mainObject, channel, requiredCompositionList) {
                     dps2: mainObject.roles.DPS.spots[1],
                     dps3: mainObject.roles.DPS.spots[2],
                 });
+
+                // Update the interaction status to "finished"
+                await interactionStatusTable.update(
+                    { interaction_status: "finished" },
+                    { where: { interaction_id: mainObject.interactionId } }
+                );
             } catch (err) {
                 console.error("Error writing to table:", err);
             }

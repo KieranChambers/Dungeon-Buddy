@@ -52,8 +52,48 @@ const dungeonInstanceTable = sequelize.define("dungeoninstance", {
     },
 });
 
+const errorTable = sequelize.define("errors", {
+    error_id: {
+        type: Sequelize.INTEGER,
+        primaryKey: true,
+        autoIncrement: true,
+    },
+    error_name: {
+        type: Sequelize.STRING,
+        allowNull: false,
+    },
+    error_message: {
+        type: Sequelize.STRING,
+        allowNull: false,
+    },
+    user_id: {
+        type: Sequelize.STRING,
+        allowNull: false,
+    },
+});
+
+const interactionStatusTable = sequelize.define("interaction_status", {
+    status_id: {
+        type: Sequelize.INTEGER,
+        primaryKey: true,
+        autoIncrement: true,
+    },
+    interaction_id: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+    },
+    interaction_user: {
+        type: Sequelize.STRING,
+        allowNull: false,
+    },
+    interaction_status: {
+        type: Sequelize.STRING,
+        allowNull: false,
+    },
+});
+
 function syncTables() {
     sequelize.sync({ force: false });
 }
 
-module.exports = { syncTables, dungeonInstanceTable };
+module.exports = { syncTables, dungeonInstanceTable, errorTable, interactionStatusTable };

@@ -5,8 +5,10 @@ const {
     StringSelectMenuOptionBuilder,
 } = require("discord.js");
 const { Op } = require("sequelize");
+
 const { dungeonInstanceTable } = require("../../utils/loadDb.js");
 const { getPastDungeonObject } = require("../../utils/historyLogic.js");
+const { processError } = require("../../utils/errorHandling.js");
 
 const timeOptions = {
     year: "numeric",
@@ -88,26 +90,7 @@ module.exports = {
                 components: [],
             });
         } catch (e) {
-            // Check if the error is due to a timeout
-            if (
-                e.name.includes("InteractionCollectorError") &&
-                e.message.includes("Collector received no interactions")
-            ) {
-                // Inform user about the timeout
-                await interaction.editReply({
-                    content:
-                        "You did not respond in time (60s).\nPlease try the command again if you wish to view past dungeons.",
-                    ephemeral: true,
-                    components: [], // Need to send empty components to remove the dropdown
-                });
-            } else {
-                // Optionally send a message to the user if the error is different
-                await interaction.editReply({
-                    content: "An error occurred while processing your request.",
-                    ephemeral: true,
-                    components: [],
-                });
-            }
+            processError(e, interaction);
         }
     },
 };

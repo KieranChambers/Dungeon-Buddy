@@ -12,6 +12,8 @@ const { dungeonList, wowWords } = require("../../utils/loadJson");
 const { generatePassphrase, isDPSRole } = require("../../utils/utilFunctions");
 const { getEligibleComposition } = require("../../utils/dungeonLogic");
 const { sendEmbed } = require("../../utils/sendEmbed");
+const { interactionStatusTable } = require("../../utils/loadDb");
+const { processError } = require("../../utils/errorHandling");
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -57,6 +59,7 @@ module.exports = {
                 spotIcons: [],
                 filledSpot: "~~Filled Spot~~",
             },
+            interactionId: interaction.id,
             interactionUser: {
                 userId: `<@${interaction.user.id}>`,
                 userChosenRole: "",
@@ -252,36 +255,31 @@ module.exports = {
                         sendEmbed(mainObject, currentChannel, updatedDungeonCompositionList);
 
                         await compositionConfirmation.deleteReply();
+
+                        // Send the created dungeon status to the database
+                        await interactionStatusTable.create({
+                            interaction_id: interaction.id,
+                            interaction_user: interaction.user.id,
+                            interaction_status: "created",
+                        });
                     }
                     if (i.customId === "cancel") {
-                        await interaction.followUp({
+                        await interaction.editReply({
                             content:
                                 "Cancelled. Please try the command again if you wish to create a group.",
                             ephemeral: true,
+                            components: [],
+                        });
+
+                        interactionStatusTable.create({
+                            interaction_id: interaction.id,
+                            interaction_user: interaction.user.id,
+                            interaction_status: "cancelled",
                         });
                     }
                 });
             } catch (e) {
-                // Check if the error is due to a timeout
-                if (
-                    e.name.includes("InteractionCollectorError") &&
-                    e.message.includes("Collector received no interactions")
-                ) {
-                    // Inform user about the timeout
-                    await interaction.editReply({
-                        content:
-                            "You did not respond in time (60s).\nPlease try the command again if you wish to create a group.",
-                        ephemeral: true,
-                        component: [],
-                    });
-                } else {
-                    // Optionally send a message to the user if the error is different
-                    await interaction.editReply({
-                        content: "An error occurred while processing your request.",
-                        ephemeral: true,
-                        component: [],
-                    });
-                }
+                processError(e, interaction);
             }
         }
         runCommandLogic();

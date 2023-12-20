@@ -2,6 +2,7 @@ const {
     ActionRowBuilder,
     StringSelectMenuBuilder,
     StringSelectMenuOptionBuilder,
+    ButtonStyle,
 } = require("discord.js");
 const { dungeonData } = require("./loadJson");
 const { createButton } = require("./discordFunctions");
@@ -42,7 +43,7 @@ async function processDungeonEmbed(
 ) {
     const newDungeonObject = getDungeonObject(dungeon, difficulty, mainObject);
     if (newDungeonObject.status === "full") {
-        groupUtilityCollector.stop("full");
+        groupUtilityCollector.stop("finished");
         await i.update({
             content: ``,
             embeds: [newDungeonObject],
@@ -111,10 +112,18 @@ function getDungeonButtonRow(mainObject) {
     const addHealerToGroup = createButton(healer, healer.emoji, healer.style, healer.disabled);
     const addDpsToGroup = createButton(dps, dps.emoji, dps.style, dps.disabled);
 
+    const cancelGroupButton = createButton({
+        customId: "cancelGroup",
+        emoji: "❌",
+        style: ButtonStyle.Secondary,
+        disabled: false,
+    });
+
     const embedButtonRow = new ActionRowBuilder().addComponents(
         addTankToGroup,
         addHealerToGroup,
-        addDpsToGroup
+        addDpsToGroup,
+        cancelGroupButton
     );
 
     return embedButtonRow;

@@ -5,72 +5,24 @@ const {
     StringSelectMenuOptionBuilder,
     ComponentType,
     ButtonBuilder,
-    ButtonStyle,
 } = require("discord.js");
 
-const { dungeonList, wowWords } = require("../../utils/loadJson");
-const { generatePassphrase, isDPSRole } = require("../../utils/utilFunctions");
+const { dungeonList } = require("../../utils/loadJson");
+const { getMainObject } = require("../../utils/getMainObject");
+const { isDPSRole } = require("../../utils/utilFunctions");
 const { getEligibleComposition } = require("../../utils/dungeonLogic");
 const { sendEmbed } = require("../../utils/sendEmbed");
 const { interactionStatusTable } = require("../../utils/loadDb");
-const { processError } = require("../../utils/errorHandling");
+const { processError, createStatusEmbed } = require("../../utils/errorHandling");
 
 module.exports = {
     data: new SlashCommandBuilder()
         .setName("lfg")
         .setDescription("Post a message to find a group for your key."),
     async execute(interaction) {
-        const mainObject = {
-            roles: {
-                Tank: {
-                    spots: [],
-                    style: ButtonStyle.Secondary,
-                    disabled: false,
-                    customId: "Tank",
-                    emoji: `<:tankrole:1181327150708686848>`,
-                },
-                Healer: {
-                    spots: [],
-                    style: ButtonStyle.Secondary,
-                    disabled: false,
-                    customId: "Healer",
-                    emoji: `<:healrole:1181327153749561364>`,
-                },
-                DPS: {
-                    spots: [],
-                    style: ButtonStyle.Secondary,
-                    disabled: false,
-                    customId: "DPS",
-                    emoji: `<:dpsrole:1181327148624117870>`,
-                },
-                DPS2: {
-                    customId: "DPS2",
-                    emoji: `<:dpsrole:1181327148624117870>`,
-                },
-                DPS3: {
-                    customId: "DPS3",
-                    emoji: `<:dpsrole:1181327148624117870>`,
-                },
-            },
-            embedData: {
-                dungeonName: "",
-                dungeonDifficulty: "",
-                listedAs: "",
-                spotIcons: [],
-                filledSpot: "~~Filled Spot~~",
-            },
-            interactionId: interaction.id,
-            interactionUser: {
-                userId: `<@${interaction.user.id}>`,
-                userChosenRole: "",
-            },
-            utils: {
-                passphrase: {
-                    phrase: generatePassphrase(wowWords),
-                },
-            },
-        };
+        const mainObject = getMainObject(interaction);
 
+        // Timeout for the interaction collector
         const timeout = 60_000;
 
         const selectDungeon = new StringSelectMenuBuilder()
@@ -254,6 +206,7 @@ module.exports = {
                     if (i.customId === "confirm") {
                         sendEmbed(mainObject, currentChannel, updatedDungeonCompositionList);
 
+                        // Delete the interaction confirmation messages due to the ephemeral flag
                         await compositionConfirmation.deleteReply();
 
                         // Send the created dungeon status to the database
@@ -264,12 +217,7 @@ module.exports = {
                         });
                     }
                     if (i.customId === "cancel") {
-                        await interaction.editReply({
-                            content:
-                                "Cancelled. Please try the command again if you wish to create a group.",
-                            ephemeral: true,
-                            components: [],
-                        });
+                        await createStatusEmbed("LFG cancelled by the user.", dungeonResponse);
 
                         interactionStatusTable.create({
                             interaction_id: interaction.id,

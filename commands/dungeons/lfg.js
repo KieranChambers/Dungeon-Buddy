@@ -82,8 +82,13 @@ module.exports = {
                     .setEmoji(mainObject.roles.DPS.emoji)
             );
 
-        const confirmSuccess = new ButtonBuilder()
+        const confirmComposition = new ButtonBuilder()
             .setLabel("Confirm")
+            .setCustomId("confirmComp")
+            .setStyle(3);
+
+        const confirmSuccess = new ButtonBuilder()
+            .setLabel("Create Group")
             .setCustomId("confirm")
             .setStyle(3);
 
@@ -142,6 +147,7 @@ module.exports = {
                 });
 
                 const userChosenRole = userRoleConfirmation.values[0];
+                // Add the user's chosen role to the main object so it's easily accessible
                 mainObject.interactionUser.userChosenRole = userChosenRole;
 
                 // Calculate the eligible composition based on the user's chosen role
@@ -149,83 +155,116 @@ module.exports = {
 
                 const teamCompositionRow = new ActionRowBuilder().addComponents(selectComposition);
 
+                const compositionSuccessRow = new ActionRowBuilder().addComponents(
+                    confirmComposition
+                );
+
                 const compositionResponse = await userRoleConfirmation.update({
-                    content: `Dungeon: ${dungeonToRun}\nDifficulty: +${dungeonDifficulty}\nYour role: ${userChosenRole}\n`,
-                    components: [teamCompositionRow],
+                    content: `Dungeon: ${dungeonToRun}\nDifficulty: +${dungeonDifficulty}\nYour role: ${userChosenRole}`,
+                    components: [teamCompositionRow, compositionSuccessRow],
                 });
 
-                const compositionConfirmation = await compositionResponse.awaitMessageComponent({
+                // Temporary storage for dropdown values
+                let tempDungeonComposition = null;
+
+                // Create a collector for both dropdown and button interactions
+                const compositionCollector = compositionResponse.createMessageComponentCollector({
                     filter: userFilter,
                     time: timeout,
                 });
 
-                const dungeonCompositionList = compositionConfirmation.values;
+                compositionCollector.on("collect", async (i) => {
+                    if (i.isStringSelectMenu()) {
+                        tempDungeonComposition = i.values;
 
-                mainObject.roles[userChosenRole].spots.push(mainObject.interactionUser.userId);
+                        // This is needed if user selects the wrong roles and wants to change them
+                        await i.deferUpdate();
+                    } else if (i.customId === "confirmComp") {
+                        // Inform the user if they didn't select any roles
+                        if (!tempDungeonComposition) {
+                            // If the user didn't select any roles display an error message
+                            await compositionResponse.edit({
+                                content: `Dungeon: ${dungeonToRun}\nDifficulty: +${dungeonDifficulty}\nYour role: ${userChosenRole}\n**Please select at least one role!**`,
+                                components: [teamCompositionRow, compositionSuccessRow],
+                            });
+                            i.deferUpdate();
+                        } else {
+                            // Update the dungeonCompositionList with the stored values
+                            const dungeonCompositionList = tempDungeonComposition;
 
-                const filledSpot = mainObject.embedData.filledSpot;
+                            postCompositionProcessing(dungeonCompositionList);
+                            i.deferUpdate();
+                        }
+                    }
+                });
 
-                for (const role in mainObject.roles) {
-                    if (!dungeonCompositionList.includes(role)) {
-                        // Add filled members to the spots, except for the user's chosen role
-                        if (role !== userChosenRole) {
-                            if (isDPSRole(role)) {
-                                if (mainObject.roles["DPS"].spots.length < 3) {
-                                    mainObject.roles["DPS"].spots.push(filledSpot);
+                async function postCompositionProcessing(dungeonCompositionList) {
+                    mainObject.roles[userChosenRole].spots.push(mainObject.interactionUser.userId);
+
+                    const filledSpot = mainObject.embedData.filledSpot;
+
+                    for (const role in mainObject.roles) {
+                        if (!dungeonCompositionList.includes(role)) {
+                            // Add filled members to the spots, except for the user's chosen role
+                            if (role !== userChosenRole) {
+                                if (isDPSRole(role)) {
+                                    if (mainObject.roles["DPS"].spots.length < 3) {
+                                        mainObject.roles["DPS"].spots.push(filledSpot);
+                                    }
+                                } else {
+                                    mainObject.roles[role].spots.push(filledSpot);
                                 }
-                            } else {
-                                mainObject.roles[role].spots.push(filledSpot);
+                            }
+
+                            if (isDPSRole(role) & (mainObject.roles["DPS"].spots.length >= 3)) {
+                                mainObject.roles["DPS"].disabled = true;
+                            } else if (!isDPSRole(role)) {
+                                mainObject.roles[role].disabled = true;
                             }
                         }
+                    }
 
-                        if (isDPSRole(role) & (mainObject.roles["DPS"].spots.length >= 3)) {
-                            mainObject.roles["DPS"].disabled = true;
-                        } else if (!isDPSRole(role)) {
-                            mainObject.roles[role].disabled = true;
+                    const updatedDungeonCompositionList = dungeonCompositionList.map((role) => {
+                        return role.startsWith("DPS") ? "DPS" : role;
+                    });
+                    const dungeonComposition = updatedDungeonCompositionList.join(", ");
+
+                    await compositionResponse.edit({
+                        content: `Dungeon: ${dungeonToRun}.\nDifficulty: +${dungeonDifficulty}.\nYour role: ${userChosenRole}\nNeed: ${dungeonComposition}.`,
+                        components: [confirmCancelRow],
+                    });
+
+                    const confirmCollector = dungeonResponse.createMessageComponentCollector({
+                        componentType: ComponentType.Button,
+                        time: timeout,
+                        filter: userFilter,
+                    });
+
+                    confirmCollector.on("collect", async (i) => {
+                        if (i.customId === "confirm") {
+                            sendEmbed(mainObject, currentChannel, updatedDungeonCompositionList);
+
+                            // Delete the interaction confirmation messages due to the ephemeral flag
+                            await interaction.deleteReply();
+
+                            // Send the created dungeon status to the database
+                            await interactionStatusTable.create({
+                                interaction_id: interaction.id,
+                                interaction_user: interaction.user.id,
+                                interaction_status: "created",
+                            });
                         }
-                    }
+                        if (i.customId === "cancel") {
+                            await createStatusEmbed("LFG cancelled by the user.", dungeonResponse);
+
+                            interactionStatusTable.create({
+                                interaction_id: interaction.id,
+                                interaction_user: interaction.user.id,
+                                interaction_status: "cancelled",
+                            });
+                        }
+                    });
                 }
-
-                const updatedDungeonCompositionList = dungeonCompositionList.map((role) => {
-                    return role.startsWith("DPS") ? "DPS" : role;
-                });
-                const dungeonComposition = updatedDungeonCompositionList.join(", ");
-
-                await compositionConfirmation.update({
-                    content: `Dungeon: ${dungeonToRun}.\nDifficulty: +${dungeonDifficulty}.\nYour role: ${userChosenRole}\nNeed: ${dungeonComposition}.`,
-                    components: [confirmCancelRow],
-                });
-
-                const confirmCollector = dungeonResponse.createMessageComponentCollector({
-                    componentType: ComponentType.Button,
-                    time: timeout,
-                    filter: userFilter,
-                });
-
-                confirmCollector.on("collect", async (i) => {
-                    if (i.customId === "confirm") {
-                        sendEmbed(mainObject, currentChannel, updatedDungeonCompositionList);
-
-                        // Delete the interaction confirmation messages due to the ephemeral flag
-                        await compositionConfirmation.deleteReply();
-
-                        // Send the created dungeon status to the database
-                        await interactionStatusTable.create({
-                            interaction_id: interaction.id,
-                            interaction_user: interaction.user.id,
-                            interaction_status: "created",
-                        });
-                    }
-                    if (i.customId === "cancel") {
-                        await createStatusEmbed("LFG cancelled by the user.", dungeonResponse);
-
-                        interactionStatusTable.create({
-                            interaction_id: interaction.id,
-                            interaction_user: interaction.user.id,
-                            interaction_status: "cancelled",
-                        });
-                    }
-                });
             } catch (e) {
                 processError(e, interaction);
             }

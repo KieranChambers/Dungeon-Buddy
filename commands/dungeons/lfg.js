@@ -218,8 +218,6 @@ module.exports = {
                                 return role.startsWith("DPS") ? "DPS" : role;
                             });
 
-                            const dungeonComposition = updatedDungeonCompositionList.join(", ");
-
                             if (i.customId === "confirm") {
                                 sendEmbed(mainObject, currentChannel, updatedDungeonCompositionList);
 

@@ -1,9 +1,4 @@
-const {
-    ActionRowBuilder,
-    StringSelectMenuBuilder,
-    StringSelectMenuOptionBuilder,
-    ButtonStyle,
-} = require("discord.js");
+const { ActionRowBuilder, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, ButtonStyle } = require("discord.js");
 const { dungeonData } = require("./loadJson");
 const { createButton } = require("./discordFunctions");
 const { generateRoleIcons } = require("./utilFunctions");
@@ -33,14 +28,7 @@ function getEligibleComposition(mainObject) {
     return selectComposition;
 }
 
-async function processDungeonEmbed(
-    i,
-    rolesToTag,
-    dungeon,
-    difficulty,
-    mainObject,
-    groupUtilityCollector
-) {
+async function processDungeonEmbed(i, rolesToTag, dungeon, difficulty, mainObject, groupUtilityCollector) {
     const newDungeonObject = getDungeonObject(dungeon, difficulty, mainObject);
     if (newDungeonObject.status === "full") {
         groupUtilityCollector.stop("finished");
@@ -94,6 +82,8 @@ function getDungeonObject(dungeon, difficulty, mainObject) {
             { name: `${healerEmoji} Healer`, value: `${healerSpot || "\u200b"}`, inline: false },
             { name: `${dpsEmoji} DPS`, value: `${dpsSpots || "\u200b"}`, inline: false },
         ],
+        // TODO: Add an array with general tips and a random tip is chosen
+        footer: { text: "Tip: Remember to click on the key to get the passphrase for your note!" },
         status: "",
     };
     if (roleIcons.length > 4) {

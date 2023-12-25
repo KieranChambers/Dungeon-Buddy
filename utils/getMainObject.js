@@ -38,6 +38,7 @@ function getMainObject(interaction) {
         embedData: {
             dungeonName: "",
             dungeonDifficulty: "",
+            timedOrCompleted: "",
             listedAs: "",
             spotIcons: [],
             filledSpot: "~~Filled Spot~~",

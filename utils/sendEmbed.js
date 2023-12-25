@@ -1,5 +1,10 @@
 const { ComponentType } = require("discord.js");
-const { parseRolesToTag, generateListedAsString, addUserToRole } = require("./utilFunctions");
+const {
+    parseRolesToTag,
+    generateListedAsString,
+    addUserToRole,
+    userExistsInAnyRole,
+} = require("./utilFunctions");
 const { dungeonInstanceTable, interactionStatusTable } = require("./loadDb");
 const { processDungeonEmbed, getDungeonObject, getDungeonButtonRow } = require("./dungeonLogic");
 const { processEmbedError, createStatusEmbed } = require("./errorHandling");
@@ -39,7 +44,7 @@ async function sendEmbed(mainObject, channel, requiredCompositionList) {
         const discordUserId = `<@${i.user.id}>`;
         if (i.customId === "Tank") {
             addUserToRole(discordUserId, mainObject, "Tank");
-            processDungeonEmbed(
+            await processDungeonEmbed(
                 i,
                 rolesToTag,
                 dungeonName,
@@ -49,7 +54,7 @@ async function sendEmbed(mainObject, channel, requiredCompositionList) {
             );
         } else if (i.customId === "Healer") {
             addUserToRole(discordUserId, mainObject, "Healer");
-            processDungeonEmbed(
+            await processDungeonEmbed(
                 i,
                 rolesToTag,
                 dungeonName,
@@ -59,7 +64,7 @@ async function sendEmbed(mainObject, channel, requiredCompositionList) {
             );
         } else if (i.customId === "DPS") {
             addUserToRole(discordUserId, mainObject, "DPS");
-            processDungeonEmbed(
+            await processDungeonEmbed(
                 i,
                 rolesToTag,
                 dungeonName,
@@ -67,15 +72,28 @@ async function sendEmbed(mainObject, channel, requiredCompositionList) {
                 mainObject,
                 groupUtilityCollector
             );
+        } else if (i.customId === "getPassphrase") {
+            // Confirm the user is in the group
+            if (!userExistsInAnyRole(discordUserId, mainObject, "getPassphrase")) {
+                await i.reply({
+                    content: "Only group members can request the passphrase!",
+                    ephemeral: true,
+                });
+            } else {
+                await i.reply({
+                    content: `The passphrase for the dungeon is: ${mainObject.utils.passphrase.phrase}`,
+                    ephemeral: true,
+                });
+            }
         } else if (i.customId === "cancelGroup") {
             if (discordUserId !== interactionUserId) {
                 await i.reply({
                     content: "Only the group leader can cancel the group!",
                     ephemeral: true,
                 });
-                return;
+            } else {
+                groupUtilityCollector.stop("cancelledAfterCreation");
             }
-            groupUtilityCollector.stop("cancelledAfterCreation");
         }
     });
 
@@ -100,6 +118,8 @@ async function sendEmbed(mainObject, channel, requiredCompositionList) {
                 await dungeonInstanceTable.create({
                     dungeon_name: mainObject.embedData.dungeonName,
                     dungeon_difficulty: mainObject.embedData.dungeonDifficulty,
+                    timed_completed: mainObject.embedData.timedOrCompleted,
+                    passphrase: mainObject.utils.passphrase.phrase,
                     interaction_user: mainObject.interactionUser.userId,
                     user_chosen_role: mainObject.interactionUser.userChosenRole,
                     tank: mainObject.roles.Tank.spots[0],

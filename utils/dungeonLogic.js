@@ -63,6 +63,7 @@ async function processDungeonEmbed(
 function getDungeonObject(dungeon, difficulty, mainObject) {
     const listedAs = mainObject.embedData.listedAs;
     const interactionUser = mainObject.interactionUser.userId;
+    const timedCompleted = mainObject.embedData.timedOrCompleted;
 
     const tank = mainObject.roles.Tank;
     const healer = mainObject.roles.Healer;
@@ -87,7 +88,7 @@ function getDungeonObject(dungeon, difficulty, mainObject) {
         fields: [
             { name: `Created by`, value: `${interactionUser}`, inline: false },
             { name: `Listed as`, value: ` ${listedAs}`, inline: true },
-            { name: "Passphrase", value: `${mainObject.utils.passphrase.phrase}`, inline: true },
+            { name: "Timed/Completed", value: `${timedCompleted}`, inline: true },
             { name: `${tankEmoji} Tank `, value: `${tankSpot || "\u200b"}`, inline: false },
 
             { name: `${healerEmoji} Healer`, value: `${healerSpot || "\u200b"}`, inline: false },
@@ -112,6 +113,13 @@ function getDungeonButtonRow(mainObject) {
     const addHealerToGroup = createButton(healer, healer.emoji, healer.style, healer.disabled);
     const addDpsToGroup = createButton(dps, dps.emoji, dps.style, dps.disabled);
 
+    const getPassphraseButton = createButton({
+        customId: "getPassphrase",
+        emoji: "🔑",
+        style: ButtonStyle.Secondary,
+        disabled: false,
+    });
+
     const cancelGroupButton = createButton({
         customId: "cancelGroup",
         emoji: "❌",
@@ -123,6 +131,7 @@ function getDungeonButtonRow(mainObject) {
         addTankToGroup,
         addHealerToGroup,
         addDpsToGroup,
+        getPassphraseButton,
         cancelGroupButton
     );
 

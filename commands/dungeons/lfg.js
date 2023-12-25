@@ -62,6 +62,16 @@ module.exports = {
                 )
             );
 
+        const selectTimedCompleted = new StringSelectMenuBuilder()
+            .setCustomId("timedCompleted")
+            .setPlaceholder("Is the goal to time or complete the dungeon?")
+            .setMinValues(1)
+            .setMaxValues(1)
+            .addOptions(
+                new StringSelectMenuOptionBuilder().setLabel("Timed").setValue("Timed"),
+                new StringSelectMenuOptionBuilder().setLabel("Completed").setValue("Completed")
+            );
+
         const selectUserRole = new StringSelectMenuBuilder()
             .setCustomId("userRole")
             .setPlaceholder("Select your role")
@@ -99,6 +109,7 @@ module.exports = {
 
         const dungeonRow = new ActionRowBuilder().addComponents(selectDungeon);
         const difficultyRow = new ActionRowBuilder().addComponents(selectDifficulty);
+        const timedCompletedRow = new ActionRowBuilder().addComponents(selectTimedCompleted);
         const userRoleRow = new ActionRowBuilder().addComponents(selectUserRole);
 
         const confirmCancelRow = new ActionRowBuilder().addComponents(
@@ -136,7 +147,21 @@ module.exports = {
                 const dungeonDifficulty = difficultyConfirmation.values[0];
                 mainObject.embedData.dungeonDifficulty = `+${dungeonDifficulty}`;
 
-                const userRoleResponse = await difficultyConfirmation.update({
+                const timedCompletedResponse = await difficultyConfirmation.update({
+                    content: `Dungeon: ${dungeonToRun}\nDifficulty: +${dungeonDifficulty}`,
+                    components: [timedCompletedRow],
+                });
+
+                const timedCompletedConfirmation =
+                    await timedCompletedResponse.awaitMessageComponent({
+                        filter: userFilter,
+                        time: timeout,
+                    });
+
+                const timedOrCompleted = timedCompletedConfirmation.values[0];
+                mainObject.embedData.timedOrCompleted = timedOrCompleted;
+
+                const userRoleResponse = await timedCompletedConfirmation.update({
                     content: `Dungeon: ${dungeonToRun}\nDifficulty: +${dungeonDifficulty}`,
                     components: [userRoleRow],
                 });

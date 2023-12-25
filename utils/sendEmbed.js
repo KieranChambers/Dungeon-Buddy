@@ -1,10 +1,5 @@
 const { ComponentType } = require("discord.js");
-const {
-    parseRolesToTag,
-    generateListedAsString,
-    addUserToRole,
-    userExistsInAnyRole,
-} = require("./utilFunctions");
+const { parseRolesToTag, generateListedAsString, addUserToRole, userExistsInAnyRole } = require("./utilFunctions");
 const { dungeonInstanceTable, interactionStatusTable } = require("./loadDb");
 const { processDungeonEmbed, getDungeonObject, getDungeonButtonRow } = require("./dungeonLogic");
 const { processEmbedError, createStatusEmbed } = require("./errorHandling");
@@ -14,11 +9,7 @@ async function sendEmbed(mainObject, channel, requiredCompositionList) {
     const interactionUserId = mainObject.interactionUser.userId;
 
     // Get the roles to tag
-    const rolesToTag = parseRolesToTag(
-        dungeonDifficulty,
-        requiredCompositionList,
-        channel.guild.id
-    );
+    const rolesToTag = parseRolesToTag(dungeonDifficulty, requiredCompositionList, channel.guild.id);
 
     // Update the listedAs field in the mainObject
     mainObject.embedData.listedAs = generateListedAsString(dungeonName, dungeonDifficulty);
@@ -44,34 +35,13 @@ async function sendEmbed(mainObject, channel, requiredCompositionList) {
         const discordUserId = `<@${i.user.id}>`;
         if (i.customId === "Tank") {
             addUserToRole(discordUserId, mainObject, "Tank");
-            await processDungeonEmbed(
-                i,
-                rolesToTag,
-                dungeonName,
-                dungeonDifficulty,
-                mainObject,
-                groupUtilityCollector
-            );
+            await processDungeonEmbed(i, rolesToTag, dungeonName, dungeonDifficulty, mainObject, groupUtilityCollector);
         } else if (i.customId === "Healer") {
             addUserToRole(discordUserId, mainObject, "Healer");
-            await processDungeonEmbed(
-                i,
-                rolesToTag,
-                dungeonName,
-                dungeonDifficulty,
-                mainObject,
-                groupUtilityCollector
-            );
+            await processDungeonEmbed(i, rolesToTag, dungeonName, dungeonDifficulty, mainObject, groupUtilityCollector);
         } else if (i.customId === "DPS") {
             addUserToRole(discordUserId, mainObject, "DPS");
-            await processDungeonEmbed(
-                i,
-                rolesToTag,
-                dungeonName,
-                dungeonDifficulty,
-                mainObject,
-                groupUtilityCollector
-            );
+            await processDungeonEmbed(i, rolesToTag, dungeonName, dungeonDifficulty, mainObject, groupUtilityCollector);
         } else if (i.customId === "getPassphrase") {
             // Confirm the user is in the group
             if (!userExistsInAnyRole(discordUserId, mainObject, "getPassphrase")) {
@@ -81,7 +51,7 @@ async function sendEmbed(mainObject, channel, requiredCompositionList) {
                 });
             } else {
                 await i.reply({
-                    content: `The passphrase for the dungeon is: ${mainObject.utils.passphrase.phrase}`,
+                    content: `The passphrase for the dungeon is: ${mainObject.utils.passphrase.phrase}\nAdd this to your note when applying to the group in-game!`,
                     ephemeral: true,
                 });
             }

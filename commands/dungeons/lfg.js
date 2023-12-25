@@ -1,10 +1,9 @@
 const {
-    ActionRowBuilder,
-    SlashCommandBuilder,
-    StringSelectMenuBuilder,
-    StringSelectMenuOptionBuilder,
-    ComponentType,
-    ButtonBuilder,
+  ActionRowBuilder,
+  SlashCommandBuilder,
+  StringSelectMenuBuilder,
+  StringSelectMenuOptionBuilder,
+  ButtonBuilder,
 } = require("discord.js");
 
 const { dungeonList } = require("../../utils/loadJson");
@@ -13,287 +12,297 @@ const { isDPSRole } = require("../../utils/utilFunctions");
 const { getEligibleComposition } = require("../../utils/dungeonLogic");
 const { sendEmbed } = require("../../utils/sendEmbed");
 const { interactionStatusTable } = require("../../utils/loadDb");
-const { processError, createStatusEmbed } = require("../../utils/errorHandling");
+const {
+  processError,
+  createStatusEmbed,
+} = require("../../utils/errorHandling");
 
 module.exports = {
-    data: new SlashCommandBuilder()
-        .setName("lfg")
-        .setDescription("Post a message to find a group for your key."),
-    async execute(interaction) {
-        const mainObject = getMainObject(interaction);
+  data: new SlashCommandBuilder()
+    .setName("lfg")
+    .setDescription("Post a message to find a group for your key."),
+  async execute(interaction) {
+    const mainObject = getMainObject(interaction);
 
-        // Timeout for the interaction collector
-        const timeout = 60_000;
+    // Timeout for the interaction collector
+    const timeout = 60_000;
 
-        const selectDungeon = new StringSelectMenuBuilder()
-            .setCustomId("dungeons")
-            .setPlaceholder("Select a dungeon")
-            .setMinValues(1)
-            .setMaxValues(1)
-            .addOptions(
-                dungeonList.map((dungeon) =>
-                    new StringSelectMenuOptionBuilder().setLabel(dungeon).setValue(dungeon)
-                )
-            );
+    const selectDungeon = new StringSelectMenuBuilder()
+      .setCustomId("dungeons")
+      .setPlaceholder("Select a dungeon")
+      .setMinValues(1)
+      .setMaxValues(1)
+      .addOptions(
+        dungeonList.map((dungeon) =>
+          new StringSelectMenuOptionBuilder()
+            .setLabel(dungeon)
+            .setValue(dungeon)
+        )
+      );
 
-        // Parse key levels from the channel name
-        const currentChannel = interaction.channel;
-        const channelName = currentChannel.name;
-        const channelNameSplit = channelName.split("-");
-        const lowerDifficultyRange = parseInt(channelNameSplit[1].replace("m", ""));
-        const upperDifficultyRange =
-            lowerDifficultyRange === 21 ? 30 : parseInt(channelNameSplit[2].replace("m", ""));
+    // Parse key levels from the channel name
+    const currentChannel = interaction.channel;
+    const channelName = currentChannel.name;
+    const channelNameSplit = channelName.split("-");
+    const lowerDifficultyRange = parseInt(channelNameSplit[1].replace("m", ""));
+    const upperDifficultyRange =
+      lowerDifficultyRange === 21
+        ? 30
+        : parseInt(channelNameSplit[2].replace("m", ""));
 
-        // Make a list with dungeon difficulty ranges like +2, +3, +4
-        const dungeonDifficultyRanges = [];
+    // Make a list with dungeon difficulty ranges like +2, +3, +4
+    const dungeonDifficultyRanges = [];
 
-        for (let i = lowerDifficultyRange; i <= upperDifficultyRange; i++) {
-            dungeonDifficultyRanges.push(i);
-        }
+    for (let i = lowerDifficultyRange; i <= upperDifficultyRange; i++) {
+      dungeonDifficultyRanges.push(i);
+    }
 
-        const selectDifficulty = new StringSelectMenuBuilder()
-            .setCustomId("difficulty")
-            .setPlaceholder("Select a difficulty")
-            .setMinValues(1)
-            .setMaxValues(1)
-            .addOptions(
-                dungeonDifficultyRanges.map((range) =>
-                    new StringSelectMenuOptionBuilder().setLabel(`+${range}`).setValue(`${range}`)
-                )
-            );
+    const selectDifficulty = new StringSelectMenuBuilder()
+      .setCustomId("difficulty")
+      .setPlaceholder("Select a difficulty")
+      .setMinValues(1)
+      .setMaxValues(1)
+      .addOptions(
+        dungeonDifficultyRanges.map((range) =>
+          new StringSelectMenuOptionBuilder()
+            .setLabel(`+${range}`)
+            .setValue(`${range}`)
+        )
+      );
 
-        const selectTimedCompleted = new StringSelectMenuBuilder()
-            .setCustomId("timedCompleted")
-            .setPlaceholder("Is the goal to time or complete the dungeon?")
-            .setMinValues(1)
-            .setMaxValues(1)
-            .addOptions(
-                new StringSelectMenuOptionBuilder().setLabel("Timed").setValue("Timed"),
-                new StringSelectMenuOptionBuilder().setLabel("Completed").setValue("Completed")
-            );
+    const selectTimedCompleted = new StringSelectMenuBuilder()
+      .setCustomId("timedCompleted")
+      .setPlaceholder("Is the goal to time or complete the dungeon?")
+      .setMinValues(1)
+      .setMaxValues(1)
+      .addOptions(
+        new StringSelectMenuOptionBuilder().setLabel("Timed").setValue("Timed"),
+        new StringSelectMenuOptionBuilder()
+          .setLabel("Completed")
+          .setValue("Completed")
+      );
 
-        const selectUserRole = new StringSelectMenuBuilder()
-            .setCustomId("userRole")
-            .setPlaceholder("Select your role")
-            .setMinValues(1)
-            .setMaxValues(1)
-            .addOptions(
-                new StringSelectMenuOptionBuilder()
-                    .setLabel("Tank")
-                    .setValue("Tank")
-                    .setEmoji(mainObject.roles.Tank.emoji),
-                new StringSelectMenuOptionBuilder()
-                    .setLabel("Healer")
-                    .setValue("Healer")
-                    .setEmoji(mainObject.roles.Healer.emoji),
-                new StringSelectMenuOptionBuilder()
-                    .setLabel("DPS")
-                    .setValue("DPS")
-                    .setEmoji(mainObject.roles.DPS.emoji)
-            );
+    const selectUserRole = new StringSelectMenuBuilder()
+      .setCustomId("userRole")
+      .setPlaceholder("Select your role")
+      .setMinValues(1)
+      .setMaxValues(1)
+      .addOptions(
+        new StringSelectMenuOptionBuilder()
+          .setLabel("Tank")
+          .setValue("Tank")
+          .setEmoji(mainObject.roles.Tank.emoji),
+        new StringSelectMenuOptionBuilder()
+          .setLabel("Healer")
+          .setValue("Healer")
+          .setEmoji(mainObject.roles.Healer.emoji),
+        new StringSelectMenuOptionBuilder()
+          .setLabel("DPS")
+          .setValue("DPS")
+          .setEmoji(mainObject.roles.DPS.emoji)
+      );
 
-        const confirmComposition = new ButtonBuilder()
-            .setLabel("Confirm")
-            .setCustomId("confirmComp")
-            .setStyle(3);
+    const confirmSuccess = new ButtonBuilder()
+      .setLabel("Create Group")
+      .setCustomId("confirm")
+      .setStyle(3);
 
-        const confirmSuccess = new ButtonBuilder()
-            .setLabel("Create Group")
-            .setCustomId("confirm")
-            .setStyle(3);
+    const confirmCancel = new ButtonBuilder()
+      .setLabel("Cancel")
+      .setCustomId("cancel")
+      .setStyle(4);
 
-        const confirmCancel = new ButtonBuilder()
-            .setLabel("Cancel")
-            .setCustomId("cancel")
-            .setStyle(4);
+    const dungeonRow = new ActionRowBuilder().addComponents(selectDungeon);
+    const difficultyRow = new ActionRowBuilder().addComponents(
+      selectDifficulty
+    );
+    const timedCompletedRow = new ActionRowBuilder().addComponents(
+      selectTimedCompleted
+    );
+    const userRoleRow = new ActionRowBuilder().addComponents(selectUserRole);
 
-        const dungeonRow = new ActionRowBuilder().addComponents(selectDungeon);
-        const difficultyRow = new ActionRowBuilder().addComponents(selectDifficulty);
-        const timedCompletedRow = new ActionRowBuilder().addComponents(selectTimedCompleted);
-        const userRoleRow = new ActionRowBuilder().addComponents(selectUserRole);
+    const confirmCancelRow = new ActionRowBuilder().addComponents(
+      confirmSuccess,
+      confirmCancel
+    );
 
-        const confirmCancelRow = new ActionRowBuilder().addComponents(
-            confirmSuccess,
-            confirmCancel
+    const dungeonResponse = await interaction.reply({
+      ephemeral: true,
+      components: [dungeonRow],
+    });
+
+    const userFilter = (i) => i.user.id === interaction.user.id;
+
+    async function runCommandLogic() {
+      try {
+        const dungeonConfirmation = await dungeonResponse.awaitMessageComponent(
+          {
+            filter: userFilter,
+            time: timeout,
+          }
         );
 
-        const dungeonResponse = await interaction.reply({
-            ephemeral: true,
-            components: [dungeonRow],
+        const dungeonToRun = dungeonConfirmation.values[0];
+        mainObject.embedData.dungeonName = dungeonToRun;
+
+        const difficultyResponse = await dungeonConfirmation.update({
+          content: `Dungeon: ${dungeonToRun}.`,
+          components: [difficultyRow],
         });
 
-        const userFilter = (i) => i.user.id === interaction.user.id;
+        const difficultyConfirmation =
+          await difficultyResponse.awaitMessageComponent({
+            filter: userFilter,
+            time: timeout,
+          });
 
-        async function runCommandLogic() {
-            try {
-                const dungeonConfirmation = await dungeonResponse.awaitMessageComponent({
-                    filter: userFilter,
-                    time: timeout,
-                });
+        const dungeonDifficulty = difficultyConfirmation.values[0];
+        mainObject.embedData.dungeonDifficulty = `+${dungeonDifficulty}`;
 
-                const dungeonToRun = dungeonConfirmation.values[0];
-                mainObject.embedData.dungeonName = dungeonToRun;
+        const timedCompletedResponse = await difficultyConfirmation.update({
+          content: `Dungeon: ${dungeonToRun}\nDifficulty: +${dungeonDifficulty}`,
+          components: [timedCompletedRow],
+        });
 
-                const difficultyResponse = await dungeonConfirmation.update({
-                    content: `Dungeon: ${dungeonToRun}.`,
-                    components: [difficultyRow],
-                });
+        const timedCompletedConfirmation =
+          await timedCompletedResponse.awaitMessageComponent({
+            filter: userFilter,
+            time: timeout,
+          });
 
-                const difficultyConfirmation = await difficultyResponse.awaitMessageComponent({
-                    filter: userFilter,
-                    time: timeout,
-                });
+        const timedOrCompleted = timedCompletedConfirmation.values[0];
+        mainObject.embedData.timedOrCompleted = timedOrCompleted;
 
-                const dungeonDifficulty = difficultyConfirmation.values[0];
-                mainObject.embedData.dungeonDifficulty = `+${dungeonDifficulty}`;
+        const userRoleResponse = await timedCompletedConfirmation.update({
+          content: `Dungeon: ${dungeonToRun}\nDifficulty: +${dungeonDifficulty}\nTimed/Completed: ${timedOrCompleted}`,
+          components: [userRoleRow],
+        });
 
-                const timedCompletedResponse = await difficultyConfirmation.update({
-                    content: `Dungeon: ${dungeonToRun}\nDifficulty: +${dungeonDifficulty}`,
-                    components: [timedCompletedRow],
-                });
+        const userRoleConfirmation =
+          await userRoleResponse.awaitMessageComponent({
+            filter: userFilter,
+            time: timeout,
+          });
 
-                const timedCompletedConfirmation =
-                    await timedCompletedResponse.awaitMessageComponent({
-                        filter: userFilter,
-                        time: timeout,
-                    });
+        const userChosenRole = userRoleConfirmation.values[0];
+        // Add the user's chosen role to the main object so it's easily accessible
+        mainObject.interactionUser.userChosenRole = userChosenRole;
 
-                const timedOrCompleted = timedCompletedConfirmation.values[0];
-                mainObject.embedData.timedOrCompleted = timedOrCompleted;
+        // Calculate the eligible composition based on the user's chosen role
+        const selectComposition = getEligibleComposition(mainObject);
 
-                const userRoleResponse = await timedCompletedConfirmation.update({
-                    content: `Dungeon: ${dungeonToRun}\nDifficulty: +${dungeonDifficulty}`,
-                    components: [userRoleRow],
-                });
+        const teamCompositionRow = new ActionRowBuilder().addComponents(
+          selectComposition
+        );
 
-                const userRoleConfirmation = await userRoleResponse.awaitMessageComponent({
-                    filter: userFilter,
-                    time: timeout,
-                });
+        const compositionResponse = await userRoleConfirmation.update({
+          content: `Dungeon: ${dungeonToRun}\nDifficulty: +${dungeonDifficulty}\nTimed/Completed: ${timedOrCompleted}\nYour role: ${userChosenRole}\nRequired roles:`,
+          components: [teamCompositionRow, confirmCancelRow],
+        });
 
-                const userChosenRole = userRoleConfirmation.values[0];
-                // Add the user's chosen role to the main object so it's easily accessible
-                mainObject.interactionUser.userChosenRole = userChosenRole;
+        // Temporary storage for dropdown values
+        let dungeonCompositionList = null;
 
-                // Calculate the eligible composition based on the user's chosen role
-                const selectComposition = getEligibleComposition(mainObject);
+        // Create a collector for both dropdown and button interactions
+        const confirmCollector =
+          compositionResponse.createMessageComponentCollector({
+            filter: userFilter,
+            time: timeout,
+          });
 
-                const teamCompositionRow = new ActionRowBuilder().addComponents(selectComposition);
+        confirmCollector.on("collect", async (i) => {
+          if (i.isStringSelectMenu()) {
+            dungeonCompositionList = i.values;
 
-                const compositionSuccessRow = new ActionRowBuilder().addComponents(
-                    confirmComposition
+            // This is required if user selects the wrong roles and wants to change them
+            await i.deferUpdate();
+          } else if (i.customId === "confirm") {
+            // Inform the user if they didn't select any roles
+            if (!dungeonCompositionList) {
+              // If the user didn't select any roles display a warning message
+              await compositionResponse.edit({
+                content: `Dungeon: ${dungeonToRun}\nDifficulty: +${dungeonDifficulty}\nTimed/Completed: ${timedOrCompleted}\nYour role: ${userChosenRole}\nRequired roles:\n**Please select at least one role!**`,
+                components: [teamCompositionRow, confirmCancelRow],
+              });
+
+              i.deferUpdate();
+            } else {
+              // Add the user to the main object
+              mainObject.roles[userChosenRole].spots.push(
+                mainObject.interactionUser.userId
+              );
+
+              // Pull the filled spot from the main object
+              const filledSpot = mainObject.embedData.filledSpot;
+
+              for (const role in mainObject.roles) {
+                if (!dungeonCompositionList.includes(role)) {
+                  // Add filled members to the spots, except for the user's chosen role
+                  if (role !== userChosenRole) {
+                    if (isDPSRole(role)) {
+                      if (mainObject.roles["DPS"].spots.length < 3) {
+                        mainObject.roles["DPS"].spots.push(filledSpot);
+                      }
+                    } else {
+                      mainObject.roles[role].spots.push(filledSpot);
+                    }
+                  }
+
+                  if (
+                    isDPSRole(role) &
+                    (mainObject.roles["DPS"].spots.length >= 3)
+                  ) {
+                    mainObject.roles["DPS"].disabled = true;
+                  } else if (!isDPSRole(role)) {
+                    mainObject.roles[role].disabled = true;
+                  }
+                }
+              }
+
+              const updatedDungeonCompositionList = dungeonCompositionList.map(
+                (role) => {
+                  return role.startsWith("DPS") ? "DPS" : role;
+                }
+              );
+
+              const dungeonComposition =
+                updatedDungeonCompositionList.join(", ");
+
+              if (i.customId === "confirm") {
+                sendEmbed(
+                  mainObject,
+                  currentChannel,
+                  updatedDungeonCompositionList
                 );
 
-                const compositionResponse = await userRoleConfirmation.update({
-                    content: `Dungeon: ${dungeonToRun}\nDifficulty: +${dungeonDifficulty}\nYour role: ${userChosenRole}`,
-                    components: [teamCompositionRow, compositionSuccessRow],
+                // Delete the interaction confirmation messages due to the ephemeral flag
+                await interaction.deleteReply();
+
+                // Send the created dungeon status to the database
+                await interactionStatusTable.create({
+                  interaction_id: interaction.id,
+                  interaction_user: interaction.user.id,
+                  interaction_status: "created",
                 });
-
-                // Temporary storage for dropdown values
-                let tempDungeonComposition = null;
-
-                // Create a collector for both dropdown and button interactions
-                const compositionCollector = compositionResponse.createMessageComponentCollector({
-                    filter: userFilter,
-                    time: timeout,
-                });
-
-                compositionCollector.on("collect", async (i) => {
-                    if (i.isStringSelectMenu()) {
-                        tempDungeonComposition = i.values;
-
-                        // This is needed if user selects the wrong roles and wants to change them
-                        await i.deferUpdate();
-                    } else if (i.customId === "confirmComp") {
-                        // Inform the user if they didn't select any roles
-                        if (!tempDungeonComposition) {
-                            // If the user didn't select any roles display an error message
-                            await compositionResponse.edit({
-                                content: `Dungeon: ${dungeonToRun}\nDifficulty: +${dungeonDifficulty}\nYour role: ${userChosenRole}\n**Please select at least one role!**`,
-                                components: [teamCompositionRow, compositionSuccessRow],
-                            });
-                            i.deferUpdate();
-                        } else {
-                            // Update the dungeonCompositionList with the stored values
-                            const dungeonCompositionList = tempDungeonComposition;
-
-                            postCompositionProcessing(dungeonCompositionList);
-                            i.deferUpdate();
-                        }
-                    }
-                });
-
-                async function postCompositionProcessing(dungeonCompositionList) {
-                    mainObject.roles[userChosenRole].spots.push(mainObject.interactionUser.userId);
-
-                    const filledSpot = mainObject.embedData.filledSpot;
-
-                    for (const role in mainObject.roles) {
-                        if (!dungeonCompositionList.includes(role)) {
-                            // Add filled members to the spots, except for the user's chosen role
-                            if (role !== userChosenRole) {
-                                if (isDPSRole(role)) {
-                                    if (mainObject.roles["DPS"].spots.length < 3) {
-                                        mainObject.roles["DPS"].spots.push(filledSpot);
-                                    }
-                                } else {
-                                    mainObject.roles[role].spots.push(filledSpot);
-                                }
-                            }
-
-                            if (isDPSRole(role) & (mainObject.roles["DPS"].spots.length >= 3)) {
-                                mainObject.roles["DPS"].disabled = true;
-                            } else if (!isDPSRole(role)) {
-                                mainObject.roles[role].disabled = true;
-                            }
-                        }
-                    }
-
-                    const updatedDungeonCompositionList = dungeonCompositionList.map((role) => {
-                        return role.startsWith("DPS") ? "DPS" : role;
-                    });
-                    const dungeonComposition = updatedDungeonCompositionList.join(", ");
-
-                    await compositionResponse.edit({
-                        content: `Dungeon: ${dungeonToRun}.\nDifficulty: +${dungeonDifficulty}.\nYour role: ${userChosenRole}\nNeed: ${dungeonComposition}.`,
-                        components: [confirmCancelRow],
-                    });
-
-                    const confirmCollector = dungeonResponse.createMessageComponentCollector({
-                        componentType: ComponentType.Button,
-                        time: timeout,
-                        filter: userFilter,
-                    });
-
-                    confirmCollector.on("collect", async (i) => {
-                        if (i.customId === "confirm") {
-                            sendEmbed(mainObject, currentChannel, updatedDungeonCompositionList);
-
-                            // Delete the interaction confirmation messages due to the ephemeral flag
-                            await interaction.deleteReply();
-
-                            // Send the created dungeon status to the database
-                            await interactionStatusTable.create({
-                                interaction_id: interaction.id,
-                                interaction_user: interaction.user.id,
-                                interaction_status: "created",
-                            });
-                        }
-                        if (i.customId === "cancel") {
-                            await createStatusEmbed("LFG cancelled by the user.", dungeonResponse);
-
-                            interactionStatusTable.create({
-                                interaction_id: interaction.id,
-                                interaction_user: interaction.user.id,
-                                interaction_status: "cancelled",
-                            });
-                        }
-                    });
-                }
-            } catch (e) {
-                processError(e, interaction);
+              }
             }
-        }
-        runCommandLogic();
-    },
+          } else if (i.customId === "cancel") {
+            await createStatusEmbed(
+              "LFG cancelled by the user.",
+              compositionResponse
+            );
+
+            interactionStatusTable.create({
+              interaction_id: interaction.id,
+              interaction_user: interaction.user.id,
+              interaction_status: "cancelled",
+            });
+          }
+        });
+      } catch (e) {
+        processError(e, interaction);
+      }
+    }
+    runCommandLogic();
+  },
 };

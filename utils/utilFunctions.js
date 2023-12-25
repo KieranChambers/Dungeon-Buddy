@@ -73,23 +73,36 @@ function updateButtonState(mainObject, roleName) {
     }
 }
 
+function userExistsInAnyRole(userId, mainObject, type) {
+    const firstThreeRoles = Object.entries(mainObject.roles).slice(0, 3);
+
+    for (let [roleName, roleData] of firstThreeRoles) {
+        if (roleData.spots.includes(userId) && type === "getPassphrase") {
+            return true;
+        } else if (roleData.spots.includes(userId) && type === "addUserToRole") {
+            roleData.spots.splice(roleData.spots.indexOf(userId), 1);
+            // Enable the button if the role is no longer full
+            updateButtonState(mainObject, roleName);
+            return true;
+        }
+    }
+
+    return false;
+}
+
 function addUserToRole(userId, mainObject, newRole) {
     if (userId === mainObject.interactionUser.userId) {
         mainObject.roles[newRole].spots.push(mainObject.embedData.filledSpot);
         updateButtonState(mainObject, newRole);
     } else {
-        const firstThreeRoles = Object.entries(mainObject.roles).slice(0, 3);
-
-        for (let [roleName, roleData] of firstThreeRoles) {
-            if (roleData.spots.includes(userId)) {
-                roleData.spots.splice(roleData.spots.indexOf(userId), 1);
-                // Enable the button if the role is no longer full
-                updateButtonState(mainObject, roleName);
-            }
-        }
-
         mainObject.roles[newRole].spots.push(userId);
         updateButtonState(mainObject, newRole);
+
+        if (userExistsInAnyRole(userId, mainObject, "addUserToRole")) {
+            return true;
+        }
+
+        return false;
     }
 }
 
@@ -99,5 +112,6 @@ module.exports = {
     generatePassphrase,
     isDPSRole,
     parseRolesToTag,
+    userExistsInAnyRole,
     addUserToRole,
 };

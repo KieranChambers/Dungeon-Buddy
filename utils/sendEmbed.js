@@ -1,17 +1,15 @@
 const { ComponentType } = require("discord.js");
-const { parseRolesToTag, generateListedAsString, addUserToRole } = require("./utilFunctions");
+const { parseRolesToTag, generateListedAsString, addUserToRole, userExistsInAnyRole } = require("./utilFunctions");
 const { dungeonInstanceTable, interactionStatusTable } = require("./loadDb");
 const { processDungeonEmbed, getDungeonObject, getDungeonButtonRow } = require("./dungeonLogic");
+const { processEmbedError, createStatusEmbed } = require("./errorHandling");
 
 async function sendEmbed(mainObject, channel, requiredCompositionList) {
     const { dungeonName, dungeonDifficulty } = mainObject.embedData;
+    const interactionUserId = mainObject.interactionUser.userId;
 
     // Get the roles to tag
-    const rolesToTag = parseRolesToTag(
-        dungeonDifficulty,
-        requiredCompositionList,
-        channel.guild.id
-    );
+    const rolesToTag = parseRolesToTag(dungeonDifficulty, requiredCompositionList, channel.guild.id);
 
     // Update the listedAs field in the mainObject
     mainObject.embedData.listedAs = generateListedAsString(dungeonName, dungeonDifficulty);
@@ -37,65 +35,61 @@ async function sendEmbed(mainObject, channel, requiredCompositionList) {
         const discordUserId = `<@${i.user.id}>`;
         if (i.customId === "Tank") {
             addUserToRole(discordUserId, mainObject, "Tank");
-            processDungeonEmbed(
-                i,
-                rolesToTag,
-                dungeonName,
-                dungeonDifficulty,
-                mainObject,
-                groupUtilityCollector
-            );
+            await processDungeonEmbed(i, rolesToTag, dungeonName, dungeonDifficulty, mainObject, groupUtilityCollector);
         } else if (i.customId === "Healer") {
             addUserToRole(discordUserId, mainObject, "Healer");
-            processDungeonEmbed(
-                i,
-                rolesToTag,
-                dungeonName,
-                dungeonDifficulty,
-                mainObject,
-                groupUtilityCollector
-            );
+            await processDungeonEmbed(i, rolesToTag, dungeonName, dungeonDifficulty, mainObject, groupUtilityCollector);
         } else if (i.customId === "DPS") {
             addUserToRole(discordUserId, mainObject, "DPS");
-            processDungeonEmbed(
-                i,
-                rolesToTag,
-                dungeonName,
-                dungeonDifficulty,
-                mainObject,
-                groupUtilityCollector
-            );
+            await processDungeonEmbed(i, rolesToTag, dungeonName, dungeonDifficulty, mainObject, groupUtilityCollector);
+        } else if (i.customId === "getPassphrase") {
+            // Confirm the user is in the group
+            if (!userExistsInAnyRole(discordUserId, mainObject, "getPassphrase")) {
+                await i.reply({
+                    content: "Only group members can request the passphrase!",
+                    ephemeral: true,
+                });
+            } else {
+                await i.reply({
+                    content: `The passphrase for the dungeon is: ${mainObject.utils.passphrase.phrase}\nAdd this to your note when applying to the group in-game!`,
+                    ephemeral: true,
+                });
+            }
+        } else if (i.customId === "cancelGroup") {
+            if (discordUserId !== interactionUserId) {
+                await i.reply({
+                    content: "Only the group leader can cancel the group!",
+                    ephemeral: true,
+                });
+            } else {
+                groupUtilityCollector.stop("cancelledAfterCreation");
+            }
         }
     });
 
     groupUtilityCollector.on("end", async (collected, reason) => {
         if (reason === "time") {
-            const timedOutObject = {
-                title: "LFG TIMED OUT (30 mins) ⏰",
-                color: 0x3c424b,
-            };
-
             try {
-                await sentEmbed.edit({
-                    content: "",
-                    embeds: [timedOutObject],
-                    components: [],
-                });
-
+                await createStatusEmbed(
+                    "Group creation timed out! (30 mins have passed without a full group forming)",
+                    sentEmbed
+                );
                 // Update the interaction status to "timed out"
                 await interactionStatusTable.update(
-                    { interaction_status: "timed out" },
+                    { interaction_status: "timeoutAfterCreation" },
                     { where: { interaction_id: mainObject.interactionId } }
                 );
-            } catch (err) {
-                console.error("Error editing message:", err);
+            } catch (e) {
+                processEmbedError(e, "Group creation timeout error", interactionUserId);
             }
-        } else if (reason === "full") {
+        } else if (reason === "finished") {
             // Send the finished dungeon data to the database
             try {
                 await dungeonInstanceTable.create({
                     dungeon_name: mainObject.embedData.dungeonName,
                     dungeon_difficulty: mainObject.embedData.dungeonDifficulty,
+                    timed_completed: mainObject.embedData.timedOrCompleted,
+                    passphrase: mainObject.utils.passphrase.phrase,
                     interaction_user: mainObject.interactionUser.userId,
                     user_chosen_role: mainObject.interactionUser.userChosenRole,
                     tank: mainObject.roles.Tank.spots[0],
@@ -105,13 +99,26 @@ async function sendEmbed(mainObject, channel, requiredCompositionList) {
                     dps3: mainObject.roles.DPS.spots[2],
                 });
 
-                // Update the interaction status to "finished"
+                // Update the interaction status to "finished" in the database
                 await interactionStatusTable.update(
                     { interaction_status: "finished" },
                     { where: { interaction_id: mainObject.interactionId } }
                 );
-            } catch (err) {
-                console.error("Error writing to table:", err);
+            } catch (e) {
+                processEmbedError(e, "Finished processing error", interactionUserId);
+            }
+        } else if (reason === "cancelledAfterCreation") {
+            // Update the embed to reflect the cancellation
+            try {
+                await createStatusEmbed("LFG cancelled by group creator.", sentEmbed);
+
+                // Update the interaction status to "cancelled" in the database
+                await interactionStatusTable.update(
+                    { interaction_status: "cancelledAfterCreation" },
+                    { where: { interaction_id: mainObject.interactionId } }
+                );
+            } catch (e) {
+                processEmbedError(e, "Cancelled after creation error", interactionUserId);
             }
         }
     });

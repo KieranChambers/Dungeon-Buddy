@@ -1,6 +1,7 @@
 const { errorTable } = require("./loadDb");
 
 async function processError(error, interaction) {
+    console.log(error);
     let errorName = "";
     // Check if the error is due to a timeout
     if (
@@ -20,7 +21,8 @@ async function processError(error, interaction) {
     } else {
         // Optionally send a message to the user if the error is different
         await interaction.editReply({
-            content: "An error occurred while processing your request.",
+            content:
+                "An error occurred while processing your request.\nIf this was a mistake, please ping <@268396301928890369>",
             ephemeral: true,
             components: [],
         });
@@ -34,4 +36,23 @@ async function processError(error, interaction) {
     });
 }
 
-module.exports = { processError };
+async function processSendEmbedError(error, reason, userId) {
+    // Send the error to the database
+    await errorTable.create({
+        error_name: reason,
+        error_message: error.message,
+        user_id: userId,
+    });
+}
+
+async function createStatusEmbed(statusMessage, embedMessage) {
+    const contactMessage = `\nPlease try /lfg again if you wish to create a group.\n\nIf this was a mistake, please ping <@268396301928890369>`;
+
+    await embedMessage.edit({
+        content: statusMessage + contactMessage,
+        embeds: [],
+        components: [],
+    });
+}
+
+module.exports = { processError, processSendEmbedError, createStatusEmbed };

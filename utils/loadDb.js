@@ -22,6 +22,14 @@ const dungeonInstanceTable = sequelize.define("dungeoninstance", {
         type: Sequelize.STRING,
         allowNull: false,
     },
+    timed_completed: {
+        type: Sequelize.STRING,
+        allowNull: false,
+    },
+    passphrase: {
+        type: Sequelize.STRING,
+        allowNull: false,
+    },
     interaction_user: {
         type: Sequelize.STRING,
         allowNull: false,

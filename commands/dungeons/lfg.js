@@ -219,7 +219,12 @@ module.exports = {
                             });
 
                             if (i.customId === "confirm") {
-                                sendEmbed(mainObject, currentChannel, updatedDungeonCompositionList);
+                                await sendEmbed(mainObject, currentChannel, updatedDungeonCompositionList);
+
+                                await i.reply({
+                                    content: `The passphrase for the dungeon is: ${mainObject.utils.passphrase.phrase}`,
+                                    ephemeral: true,
+                                });
 
                                 // Delete the interaction confirmation messages due to the ephemeral flag
                                 await interaction.deleteReply();

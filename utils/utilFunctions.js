@@ -106,13 +106,6 @@ function addUserToRole(userId, mainObject, newRole) {
     }
 }
 
-async function sendPassphraseToUser(i, mainObject) {
-    await i.reply({
-        content: `The passphrase for the dungeon is: ${mainObject.utils.passphrase.phrase}`,
-        ephemeral: true,
-    });
-}
-
 module.exports = {
     generateRoleIcons,
     generateListedAsString,
@@ -121,5 +114,4 @@ module.exports = {
     parseRolesToTag,
     userExistsInAnyRole,
     addUserToRole,
-    sendPassphraseToUser,
 };

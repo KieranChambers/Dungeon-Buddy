@@ -63,6 +63,13 @@ function parseRolesToTag(difficulty, requiredComposition, guildId) {
     return roleMentions;
 }
 
+async function sendPassphraseToUser(interaction, mainObject) {
+    await interaction.followUp({
+        content: `The passphrase for the dungeon is: \`${mainObject.utils.passphrase.phrase}\`\nAdd this to your note when applying to the group in-game!`,
+        ephemeral: true,
+    });
+}
+
 // Disable the button if the role is full
 function updateButtonState(mainObject, roleName) {
     const role = mainObject.roles[roleName];
@@ -85,6 +92,7 @@ function userExistsInAnyRole(userId, mainObject, type) {
             updateButtonState(mainObject, roleName);
             return true;
         }
+        return false;
     }
 
     return false;
@@ -94,15 +102,16 @@ function addUserToRole(userId, mainObject, newRole) {
     if (userId === mainObject.interactionUser.userId) {
         mainObject.roles[newRole].spots.push(mainObject.embedData.filledSpot);
         updateButtonState(mainObject, newRole);
+        return "interactionUser";
     } else {
         mainObject.roles[newRole].spots.push(userId);
         updateButtonState(mainObject, newRole);
 
         if (userExistsInAnyRole(userId, mainObject, "addUserToRole")) {
-            return true;
+            return "existingUser";
+        } else {
+            return "newUser";
         }
-
-        return false;
     }
 }
 
@@ -114,4 +123,5 @@ module.exports = {
     parseRolesToTag,
     userExistsInAnyRole,
     addUserToRole,
+    sendPassphraseToUser,
 };

@@ -34,14 +34,38 @@ async function sendEmbed(mainObject, channel, requiredCompositionList) {
     groupUtilityCollector.on("collect", async (i) => {
         const discordUserId = `<@${i.user.id}>`;
         if (i.customId === "Tank") {
-            addUserToRole(discordUserId, mainObject, "Tank");
-            await processDungeonEmbed(i, rolesToTag, dungeonName, dungeonDifficulty, mainObject, groupUtilityCollector);
+            const callUser = addUserToRole(discordUserId, mainObject, "Tank");
+            await processDungeonEmbed(
+                i,
+                rolesToTag,
+                dungeonName,
+                dungeonDifficulty,
+                mainObject,
+                groupUtilityCollector,
+                callUser
+            );
         } else if (i.customId === "Healer") {
-            addUserToRole(discordUserId, mainObject, "Healer");
-            await processDungeonEmbed(i, rolesToTag, dungeonName, dungeonDifficulty, mainObject, groupUtilityCollector);
+            const callUser = addUserToRole(discordUserId, mainObject, "Healer");
+            await processDungeonEmbed(
+                i,
+                rolesToTag,
+                dungeonName,
+                dungeonDifficulty,
+                mainObject,
+                groupUtilityCollector,
+                callUser
+            );
         } else if (i.customId === "DPS") {
-            addUserToRole(discordUserId, mainObject, "DPS");
-            await processDungeonEmbed(i, rolesToTag, dungeonName, dungeonDifficulty, mainObject, groupUtilityCollector);
+            const callUser = addUserToRole(discordUserId, mainObject, "DPS");
+            await processDungeonEmbed(
+                i,
+                rolesToTag,
+                dungeonName,
+                dungeonDifficulty,
+                mainObject,
+                groupUtilityCollector,
+                callUser
+            );
         } else if (i.customId === "getPassphrase") {
             // Confirm the user is in the group
             if (!userExistsInAnyRole(discordUserId, mainObject, "getPassphrase")) {
@@ -51,7 +75,7 @@ async function sendEmbed(mainObject, channel, requiredCompositionList) {
                 });
             } else {
                 await i.reply({
-                    content: `The passphrase for the dungeon is: ${mainObject.utils.passphrase.phrase}\nAdd this to your note when applying to the group in-game!`,
+                    content: `The passphrase for the dungeon is: \`${mainObject.utils.passphrase.phrase}\`\nAdd this to your note when applying to the group in-game!`,
                     ephemeral: true,
                 });
             }

@@ -1,7 +1,7 @@
 const { ActionRowBuilder, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, ButtonStyle } = require("discord.js");
 const { dungeonData } = require("./loadJson");
 const { createButton } = require("./discordFunctions");
-const { generateRoleIcons } = require("./utilFunctions");
+const { generateRoleIcons, sendPassphraseToUser } = require("./utilFunctions");
 
 function getEligibleComposition(mainObject) {
     const selectComposition = new StringSelectMenuBuilder()
@@ -28,15 +28,20 @@ function getEligibleComposition(mainObject) {
     return selectComposition;
 }
 
-async function processDungeonEmbed(i, rolesToTag, dungeon, difficulty, mainObject, groupUtilityCollector) {
+async function processDungeonEmbed(i, rolesToTag, dungeon, difficulty, mainObject, groupUtilityCollector, callUser) {
     const newDungeonObject = getDungeonObject(dungeon, difficulty, mainObject);
     if (newDungeonObject.status === "full") {
-        groupUtilityCollector.stop("finished");
         await i.update({
             content: ``,
             embeds: [newDungeonObject],
             components: [],
         });
+
+        if (callUser === "newUser") {
+            await sendPassphraseToUser(i, mainObject);
+        }
+        // Call the stop method to stop the collector
+        groupUtilityCollector.stop("finished");
     } else {
         const newEmbedButtonRow = getDungeonButtonRow(mainObject);
 
@@ -45,6 +50,10 @@ async function processDungeonEmbed(i, rolesToTag, dungeon, difficulty, mainObjec
             embeds: [newDungeonObject],
             components: [newEmbedButtonRow],
         });
+
+        if (callUser === "newUser") {
+            await sendPassphraseToUser(i, mainObject);
+        }
     }
 }
 
@@ -82,8 +91,8 @@ function getDungeonObject(dungeon, difficulty, mainObject) {
             { name: `${healerEmoji} Healer`, value: `${healerSpot || "\u200b"}`, inline: false },
             { name: `${dpsEmoji} DPS`, value: `${dpsSpots || "\u200b"}`, inline: false },
         ],
-        // TODO: Add an array with general tips and a random tip is chosen
-        footer: { text: "Tip: Remember to click on the key to get the passphrase for your note!" },
+        // TODO: Create a function to generate random footer tips
+        footer: { text: "Tip: The passphrase can be retrieved by using /history" },
         status: "",
     };
     if (roleIcons.length > 4) {

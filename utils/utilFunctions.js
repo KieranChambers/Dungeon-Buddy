@@ -92,7 +92,6 @@ function userExistsInAnyRole(userId, mainObject, type) {
             updateButtonState(mainObject, roleName);
             return true;
         }
-        return false;
     }
 
     return false;

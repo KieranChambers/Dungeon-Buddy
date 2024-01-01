@@ -222,7 +222,7 @@ module.exports = {
                                 await sendEmbed(mainObject, currentChannel, updatedDungeonCompositionList);
 
                                 await i.reply({
-                                    content: `The passphrase for the dungeon is: ${mainObject.utils.passphrase.phrase}`,
+                                    content: `The passphrase for the dungeon is: \`${mainObject.utils.passphrase.phrase}\`\nLook out for NoP members applying with this in-game!`,
                                     ephemeral: true,
                                 });
 

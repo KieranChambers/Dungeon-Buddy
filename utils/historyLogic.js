@@ -21,7 +21,7 @@ function getPastDungeonObject(dungeonInstance) {
         title: `${dungeon} ${difficulty}`,
         fields: [
             { name: `Created by`, value: `${interactionUser}`, inline: false },
-            { name: `Passphrase`, value: `${passphrase}`, inline: true },
+            { name: `Passphrase`, value: `\`${passphrase}\``, inline: true },
             { name: `Timed/Completed`, value: `${timed_completed}`, inline: true },
             { name: `${tankEmoji} Tank `, value: `${tankSpot || "\u200b"}`, inline: false },
 

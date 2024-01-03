@@ -68,7 +68,7 @@ async function sendEmbed(mainObject, channel, requiredCompositionList) {
             );
         } else if (i.customId === "getPassphrase") {
             // Confirm the user is in the group
-            if (!userExistsInAnyRole(discordUserId, mainObject, "getPassphrase")) {
+            if (!userExistsInAnyRole(discordUserId, mainObject, "userCheck")) {
                 await i.reply({
                     content: "Only group members can request the passphrase!",
                     ephemeral: true,
@@ -80,13 +80,17 @@ async function sendEmbed(mainObject, channel, requiredCompositionList) {
                 });
             }
         } else if (i.customId === "cancelGroup") {
-            if (discordUserId !== interactionUserId) {
+            // The group creator can cancel the group
+            if (discordUserId === interactionUserId) {
+                groupUtilityCollector.stop("cancelledAfterCreation");
+            } else if (userExistsInAnyRole(discordUserId, mainObject, "userCheck")) {
+                // Handle the user cancelling their participation
+                // Send two buttons to the user, one to confirm and one to cancel
+            } else {
                 await i.reply({
-                    content: "Only the group leader can cancel the group!",
+                    content: "Only group members can use this!",
                     ephemeral: true,
                 });
-            } else {
-                groupUtilityCollector.stop("cancelledAfterCreation");
             }
         }
     });

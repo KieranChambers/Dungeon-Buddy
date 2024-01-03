@@ -103,6 +103,26 @@ function getDungeonObject(dungeon, difficulty, mainObject) {
     return dungeonObject;
 }
 
+function getGroupRemovalRow() {
+    const confirmCancelButton = createButton({
+        customId: "confirmRemoval",
+        emoji: "✅",
+        style: ButtonStyle.Success,
+        disabled: false,
+    });
+
+    const cancelCancelButton = createButton({
+        customId: "cancelRemoval",
+        emoji: "❌",
+        style: ButtonStyle.Danger,
+        disabled: false,
+    });
+
+    const cancelButtonRow = new ActionRowBuilder().addComponents(confirmCancelButton, cancelCancelButton);
+
+    return cancelButtonRow;
+}
+
 function getDungeonButtonRow(mainObject) {
     const tank = mainObject.roles.Tank;
     const healer = mainObject.roles.Healer;

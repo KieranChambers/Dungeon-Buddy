@@ -84,9 +84,9 @@ function userExistsInAnyRole(userId, mainObject, type) {
     const firstThreeRoles = Object.entries(mainObject.roles).slice(0, 3);
 
     for (let [roleName, roleData] of firstThreeRoles) {
-        if (roleData.spots.includes(userId) && type === "getPassphrase") {
+        if (roleData.spots.includes(userId) && type === "userCheck") {
             return true;
-        } else if (roleData.spots.includes(userId) && type === "addUserToRole") {
+        } else if (roleData.spots.includes(userId) && type.includes("processUser", "removeUser")) {
             roleData.spots.splice(roleData.spots.indexOf(userId), 1);
             // Enable the button if the role is no longer full
             updateButtonState(mainObject, roleName);
@@ -106,7 +106,7 @@ function addUserToRole(userId, mainObject, newRole) {
         mainObject.roles[newRole].spots.push(userId);
         updateButtonState(mainObject, newRole);
 
-        if (userExistsInAnyRole(userId, mainObject, "addUserToRole")) {
+        if (userExistsInAnyRole(userId, mainObject, "processUser")) {
             return "existingUser";
         } else {
             return "newUser";

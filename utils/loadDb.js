@@ -1,10 +1,10 @@
 const Sequelize = require("sequelize");
-require("dotenv").config();
+const { dbHost, dbDialect, dbStorage } = require("../config");
 
 const sequelize = new Sequelize("database", "user", "password", {
-    host: process.env.DB_HOST,
-    dialect: process.env.DB_DIALECT,
-    storage: process.env.DB_STORAGE,
+    host: dbHost,
+    dialect: dbDialect,
+    storage: dbStorage,
 });
 
 // Define the structure for the DungeonInstance table

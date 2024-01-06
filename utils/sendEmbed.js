@@ -17,8 +17,10 @@ async function sendEmbed(mainObject, channel, requiredCompositionList) {
     // Get the roles to tag
     const rolesToTag = parseRolesToTag(dungeonDifficulty, requiredCompositionList, channel.guild.id);
 
-    // Update the listedAs field in the mainObject
-    mainObject.embedData.listedAs = generateListedAsString(dungeonName, dungeonDifficulty);
+    // Generate a listed as string for the mainObject if the user hasn't specified one
+    if (!mainObject.embedData.listedAs) {
+        mainObject.embedData.listedAs = generateListedAsString(dungeonName, dungeonDifficulty);
+    }
 
     // Create the object that is used to send to the embed
     const dungeonObject = getDungeonObject(dungeonName, dungeonDifficulty, mainObject);

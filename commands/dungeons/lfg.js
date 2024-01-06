@@ -15,9 +15,23 @@ const { interactionStatusTable } = require("../../utils/loadDb");
 const { processError, createStatusEmbed } = require("../../utils/errorHandling");
 
 module.exports = {
-    data: new SlashCommandBuilder().setName("lfg").setDescription("Post a message to find a group for your key."),
+    data: new SlashCommandBuilder()
+        .setName("lfg")
+        .setDescription("Post a message to find a group for your key.")
+        .addStringOption((option) =>
+            option
+                .setName("listed_as")
+                .setDescription("Specify a listed as name for your dungeon. Otherwise one will be generated for you.")
+                .setRequired(false)
+        ),
     async execute(interaction) {
         const mainObject = getMainObject(interaction);
+
+        // Set the listed as name if the user specified one
+        const listedAs = interaction.options.getString("listed_as");
+        if (listedAs) {
+            mainObject.embedData.listedAs = listedAs;
+        }
 
         // Timeout for the interaction collector
         const timeout = 60_000;
@@ -84,14 +98,12 @@ module.exports = {
             );
 
         const confirmSuccess = new ButtonBuilder().setLabel("Create Group").setCustomId("confirm").setStyle(3);
-
         const confirmCancel = new ButtonBuilder().setLabel("Cancel").setCustomId("cancel").setStyle(4);
 
         const dungeonRow = new ActionRowBuilder().addComponents(selectDungeon);
         const difficultyRow = new ActionRowBuilder().addComponents(selectDifficulty);
         const timedCompletedRow = new ActionRowBuilder().addComponents(selectTimedCompleted);
         const userRoleRow = new ActionRowBuilder().addComponents(selectUserRole);
-
         const confirmCancelRow = new ActionRowBuilder().addComponents(confirmSuccess, confirmCancel);
 
         const dungeonResponse = await interaction.reply({

@@ -247,6 +247,8 @@ module.exports = {
                                     interaction_user: interaction.user.id,
                                     interaction_status: "created",
                                 });
+
+                                confirmCollector.stop("confirmCreation");
                             }
                         }
                     } else if (i.customId === "cancel") {

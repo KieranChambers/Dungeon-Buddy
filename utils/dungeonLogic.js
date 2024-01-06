@@ -141,7 +141,7 @@ async function cancelGroup(interaction, groupUtilityCollector) {
     // Add a collector to listen for the confirmation
     const groupCancellationCollector = confirmGroupCancellation.createMessageComponentCollector({
         ComponentType: ComponentType.Button,
-        time: 90_000,
+        time: 60_000,
     });
 
     groupCancellationCollector.on("collect", async (i) => {
@@ -156,6 +156,8 @@ async function cancelGroup(interaction, groupUtilityCollector) {
                 content: "Group cancellation aborted.",
                 components: [],
             });
+            // Call the stop method so that the collector doesn't time out
+            groupCancellationCollector.stop("denied");
         }
     });
 

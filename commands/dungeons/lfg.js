@@ -259,6 +259,21 @@ module.exports = {
                         });
                     }
                 });
+
+                confirmCollector.on("end", async (collected, reason) => {
+                    if (reason === "time") {
+                        await compositionResponse.edit({
+                            content: "LFG timed out! Please use /lfg again to create a new group.",
+                            components: [],
+                        });
+
+                        interactionStatusTable.create({
+                            interaction_id: interaction.id,
+                            interaction_user: interaction.user.id,
+                            interaction_status: "timeoutBeforeCreation",
+                        });
+                    }
+                });
             } catch (e) {
                 processError(e, interaction);
             }

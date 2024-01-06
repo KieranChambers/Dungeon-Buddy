@@ -1,9 +1,17 @@
 const { ButtonBuilder } = require("discord.js");
 
-// TODO: Edit this function to allow for sending buttons with text rather than emojis and fix formatting issue
+function createButton({ customId, label, emoji, style, disabled }) {
+    const button = new ButtonBuilder().setCustomId(customId).setStyle(style).setDisabled(disabled);
 
-function createButton({ customId, emoji, style, disabled }) {
-    return new ButtonBuilder().setCustomId(customId).setEmoji(emoji).setStyle(style).setDisabled(disabled);
+    if (label) {
+        button.setLabel(label);
+    }
+
+    if (emoji) {
+        button.setEmoji(emoji);
+    }
+
+    return button;
 }
 
 module.exports = { createButton };

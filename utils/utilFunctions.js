@@ -80,20 +80,19 @@ function updateButtonState(mainObject, roleName) {
     }
 }
 
-function userExistsInAnyRole(userId, mainObject, type) {
+function removeUserFromRole(userId, mainObject, roleName, roleData) {
+    roleData.spots.splice(roleData.spots.indexOf(userId), 1);
+    updateButtonState(mainObject, roleName);
+}
+
+function userExistsInAnyRole(userId, mainObject) {
     const firstThreeRoles = Object.entries(mainObject.roles).slice(0, 3);
 
     for (let [roleName, roleData] of firstThreeRoles) {
-        if (roleData.spots.includes(userId) && type === "userCheck") {
-            return true;
-        } else if (roleData.spots.includes(userId) && type.includes("processUser", "removeUser")) {
-            roleData.spots.splice(roleData.spots.indexOf(userId), 1);
-            // Enable the button if the role is no longer full
-            updateButtonState(mainObject, roleName);
-            return true;
+        if (roleData.spots.includes(userId)) {
+            return [roleName, roleData];
         }
     }
-
     return false;
 }
 
@@ -103,13 +102,16 @@ function addUserToRole(userId, mainObject, newRole) {
         updateButtonState(mainObject, newRole);
         return "interactionUser";
     } else {
-        mainObject.roles[newRole].spots.push(userId);
-        updateButtonState(mainObject, newRole);
-
-        if (userExistsInAnyRole(userId, mainObject, "processUser")) {
-            return "existingUser";
-        } else {
+        if (!userExistsInAnyRole(userId, mainObject)) {
+            mainObject.roles[newRole].spots.push(userId);
+            updateButtonState(mainObject, newRole);
             return "newUser";
+        } else {
+            const [roleName, roleData] = userExistsInAnyRole(userId, mainObject);
+            removeUserFromRole(userId, mainObject, roleName, roleData);
+            mainObject.roles[newRole].spots.push(userId);
+            updateButtonState(mainObject, newRole);
+            return "existingUser";
         }
     }
 }
@@ -123,4 +125,5 @@ module.exports = {
     userExistsInAnyRole,
     addUserToRole,
     sendPassphraseToUser,
+    removeUserFromRole,
 };

@@ -1,7 +1,13 @@
 const { ComponentType } = require("discord.js");
-const { parseRolesToTag, generateListedAsString, addUserToRole, userExistsInAnyRole } = require("./utilFunctions");
+const {
+    parseRolesToTag,
+    generateListedAsString,
+    addUserToRole,
+    userExistsInAnyRole,
+    removeUserFromRole,
+} = require("./utilFunctions");
 const { dungeonInstanceTable, interactionStatusTable } = require("./loadDb");
-const { processDungeonEmbed, getDungeonObject, getDungeonButtonRow } = require("./dungeonLogic");
+const { processDungeonEmbed, getDungeonObject, getDungeonButtonRow, cancelGroup } = require("./dungeonLogic");
 const { processEmbedError, createStatusEmbed } = require("./errorHandling");
 
 async function sendEmbed(mainObject, channel, requiredCompositionList) {
@@ -68,7 +74,7 @@ async function sendEmbed(mainObject, channel, requiredCompositionList) {
             );
         } else if (i.customId === "getPassphrase") {
             // Confirm the user is in the group
-            if (!userExistsInAnyRole(discordUserId, mainObject, "userCheck")) {
+            if (!userExistsInAnyRole(discordUserId, mainObject)) {
                 await i.reply({
                     content: "Only group members can request the passphrase!",
                     ephemeral: true,
@@ -81,16 +87,28 @@ async function sendEmbed(mainObject, channel, requiredCompositionList) {
             }
         } else if (i.customId === "cancelGroup") {
             // The group creator can cancel the group
-            if (discordUserId === interactionUserId) {
-                groupUtilityCollector.stop("cancelledAfterCreation");
-            } else if (userExistsInAnyRole(discordUserId, mainObject, "userCheck")) {
-                // Handle the user cancelling their participation
-                // Send two buttons to the user, one to confirm and one to cancel
-            } else {
+            if (!userExistsInAnyRole(discordUserId, mainObject)) {
                 await i.reply({
                     content: "Only group members can use this!",
                     ephemeral: true,
                 });
+            } else {
+                if (discordUserId === interactionUserId) {
+                    await i.deferUpdate();
+                    await cancelGroup(i, groupUtilityCollector);
+                } else {
+                    const [roleName, roleData] = userExistsInAnyRole(discordUserId, mainObject);
+                    removeUserFromRole(discordUserId, mainObject, roleName, roleData);
+                    await processDungeonEmbed(
+                        i,
+                        rolesToTag,
+                        dungeonName,
+                        dungeonDifficulty,
+                        mainObject,
+                        groupUtilityCollector,
+                        "notCallUser"
+                    );
+                }
             }
         }
     });

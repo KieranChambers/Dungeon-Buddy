@@ -185,7 +185,7 @@ module.exports = {
                                 components: [teamCompositionRow, confirmCancelRow],
                             });
 
-                            i.deferUpdate();
+                            await i.deferUpdate();
                         } else {
                             // Add the user to the main object
                             mainObject.roles[userChosenRole].spots.push(mainObject.interactionUser.userId);

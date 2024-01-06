@@ -1,4 +1,10 @@
-const { ActionRowBuilder, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, ButtonStyle } = require("discord.js");
+const {
+    ActionRowBuilder,
+    ComponentType,
+    StringSelectMenuBuilder,
+    StringSelectMenuOptionBuilder,
+    ButtonStyle,
+} = require("discord.js");
 const { dungeonData } = require("./loadJson");
 const { createButton } = require("./discordFunctions");
 const { generateRoleIcons, sendPassphraseToUser } = require("./utilFunctions");
@@ -103,24 +109,69 @@ function getDungeonObject(dungeon, difficulty, mainObject) {
     return dungeonObject;
 }
 
-function getGroupRemovalRow() {
+function getGroupCancelRow() {
     const confirmCancelButton = createButton({
-        customId: "confirmRemoval",
-        emoji: "✅",
+        customId: "confirmCancelGroup",
+        label: "Yes",
         style: ButtonStyle.Success,
         disabled: false,
     });
 
-    const cancelCancelButton = createButton({
-        customId: "cancelRemoval",
-        emoji: "❌",
+    const denyCancelButton = createButton({
+        customId: "denyCancelGroup",
+        label: "No",
         style: ButtonStyle.Danger,
         disabled: false,
     });
 
-    const cancelButtonRow = new ActionRowBuilder().addComponents(confirmCancelButton, cancelCancelButton);
+    const cancelGroupRow = new ActionRowBuilder().addComponents(confirmCancelButton, denyCancelButton);
 
-    return cancelButtonRow;
+    return cancelGroupRow;
+}
+
+async function cancelGroup(interaction, groupUtilityCollector) {
+    const cancelButtonRow = getGroupCancelRow();
+
+    const confirmGroupCancellation = await interaction.followUp({
+        content: "Are you sure you want to cancel the group?",
+        ephemeral: true,
+        components: [cancelButtonRow],
+    });
+
+    // Add a collector to listen for the confirmation
+    const groupCancellationCollector = confirmGroupCancellation.createMessageComponentCollector({
+        ComponentType: ComponentType.Button,
+        time: 90_000,
+    });
+
+    groupCancellationCollector.on("collect", async (i) => {
+        if (i.customId === "confirmCancelGroup") {
+            i.update({
+                content: "Your group has been cancelled.",
+                components: [],
+            });
+            groupCancellationCollector.stop("confirmed");
+        } else if (i.customId === "denyCancelGroup") {
+            await i.update({
+                content: "Group cancellation aborted.",
+                components: [],
+            });
+        }
+    });
+
+    groupCancellationCollector.on("end", async (collected, reason) => {
+        if (reason === "time") {
+            await interaction.followUp({
+                content:
+                    "Group cancellation timed out. If you want to cancel the group please click on the ❌ button again.",
+                ephemeral: true,
+                components: [],
+            });
+        } else if (reason === "confirmed") {
+            // Call the stop method to stop the main collector
+            groupUtilityCollector.stop("cancelledAfterCreation");
+        }
+    });
 }
 
 function getDungeonButtonRow(mainObject) {
@@ -128,9 +179,24 @@ function getDungeonButtonRow(mainObject) {
     const healer = mainObject.roles.Healer;
     const dps = mainObject.roles.DPS;
 
-    const addTankToGroup = createButton(tank, tank.emoji, tank.style, tank.disabled);
-    const addHealerToGroup = createButton(healer, healer.emoji, healer.style, healer.disabled);
-    const addDpsToGroup = createButton(dps, dps.emoji, dps.style, dps.disabled);
+    const addTankToGroup = createButton({
+        customId: tank.customId,
+        emoji: tank.emoji,
+        style: tank.style,
+        disabled: tank.disabled,
+    });
+    const addHealerToGroup = createButton({
+        customId: healer.customId,
+        emoji: healer.emoji,
+        style: healer.style,
+        disabled: healer.disabled,
+    });
+    const addDpsToGroup = createButton({
+        customId: dps.customId,
+        emoji: dps.emoji,
+        style: dps.style,
+        disabled: dps.disabled,
+    });
 
     const getPassphraseButton = createButton({
         customId: "getPassphrase",
@@ -162,4 +228,5 @@ module.exports = {
     processDungeonEmbed,
     getDungeonObject,
     getDungeonButtonRow,
+    cancelGroup,
 };

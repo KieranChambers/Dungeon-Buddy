@@ -80,8 +80,14 @@ async function sendEmbed(mainObject, channel, requiredCompositionList) {
                     ephemeral: true,
                 });
             } else {
+                let contentMessage;
+                if (discordUserId === interactionUserId) {
+                    contentMessage = `The passphrase for the dungeon is: \`${mainObject.utils.passphrase.phrase}\`\nLook out for NoP members applying with this in-game!`;
+                } else {
+                    contentMessage = `The passphrase for the dungeon is: \`${mainObject.utils.passphrase.phrase}\`\nAdd this to your note when applying to the group in-game!`;
+                }
                 await i.reply({
-                    content: `The passphrase for the dungeon is: \`${mainObject.utils.passphrase.phrase}\`\nAdd this to your note when applying to the group in-game!`,
+                    content: contentMessage,
                     ephemeral: true,
                 });
             }

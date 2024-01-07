@@ -1,9 +1,5 @@
 const { SlashCommandBuilder } = require("@discordjs/builders");
-const {
-    ActionRowBuilder,
-    StringSelectMenuBuilder,
-    StringSelectMenuOptionBuilder,
-} = require("discord.js");
+const { ActionRowBuilder, StringSelectMenuBuilder, StringSelectMenuOptionBuilder } = require("discord.js");
 const { Op } = require("sequelize");
 
 const { dungeonInstanceTable } = require("../../utils/loadDb.js");
@@ -23,8 +19,8 @@ const timeOptions = {
 
 module.exports = {
     data: new SlashCommandBuilder()
-        .setName("history")
-        .setDescription("Check the team composition of a previous dungeon"),
+        .setName("lfghistory")
+        .setDescription("Check the team composition & passphrase for a previous dungeon"),
     async execute(interaction) {
         const roles = ["tank", "healer", "dps", "dps2", "dps3"];
         const userIdString = `<@${interaction.user.id}>`;
@@ -58,10 +54,7 @@ module.exports = {
                         .setLabel(
                             `${dungeon.dataValues.dungeon_name} ${
                                 dungeon.dataValues.dungeon_difficulty
-                            } - ${dungeon.dataValues.createdAt.toLocaleString(
-                                "en-GB",
-                                timeOptions
-                            )}`
+                            } - ${dungeon.dataValues.createdAt.toLocaleString("en-GB", timeOptions)}`
                         )
                         .setValue(position.toString())
                 )

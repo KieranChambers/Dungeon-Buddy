@@ -1,7 +1,13 @@
 const { ComponentType } = require("discord.js");
-const { parseRolesToTag, generateListedAsString, addUserToRole, userExistsInAnyRole } = require("./utilFunctions");
+const {
+    parseRolesToTag,
+    generateListedAsString,
+    addUserToRole,
+    userExistsInAnyRole,
+    removeUserFromRole,
+} = require("./utilFunctions");
 const { dungeonInstanceTable, interactionStatusTable } = require("./loadDb");
-const { processDungeonEmbed, getDungeonObject, getDungeonButtonRow } = require("./dungeonLogic");
+const { processDungeonEmbed, getDungeonObject, getDungeonButtonRow, cancelGroup } = require("./dungeonLogic");
 const { processEmbedError, createStatusEmbed } = require("./errorHandling");
 
 async function sendEmbed(mainObject, channel, requiredCompositionList) {
@@ -11,8 +17,10 @@ async function sendEmbed(mainObject, channel, requiredCompositionList) {
     // Get the roles to tag
     const rolesToTag = parseRolesToTag(dungeonDifficulty, requiredCompositionList, channel.guild.id);
 
-    // Update the listedAs field in the mainObject
-    mainObject.embedData.listedAs = generateListedAsString(dungeonName, dungeonDifficulty);
+    // Generate a listed as string for the mainObject if the user hasn't specified one
+    if (!mainObject.embedData.listedAs) {
+        mainObject.embedData.listedAs = generateListedAsString(dungeonName, dungeonDifficulty);
+    }
 
     // Create the object that is used to send to the embed
     const dungeonObject = getDungeonObject(dungeonName, dungeonDifficulty, mainObject);
@@ -68,25 +76,47 @@ async function sendEmbed(mainObject, channel, requiredCompositionList) {
             );
         } else if (i.customId === "getPassphrase") {
             // Confirm the user is in the group
-            if (!userExistsInAnyRole(discordUserId, mainObject, "getPassphrase")) {
+            if (!userExistsInAnyRole(discordUserId, mainObject)) {
                 await i.reply({
                     content: "Only group members can request the passphrase!",
                     ephemeral: true,
                 });
             } else {
+                let contentMessage;
+                if (discordUserId === interactionUserId) {
+                    contentMessage = `The passphrase for the dungeon is: \`${mainObject.utils.passphrase.phrase}\`\nLook out for NoP members applying with this in-game!`;
+                } else {
+                    contentMessage = `The passphrase for the dungeon is: \`${mainObject.utils.passphrase.phrase}\`\nAdd this to your note when applying to the group in-game!`;
+                }
                 await i.reply({
-                    content: `The passphrase for the dungeon is: \`${mainObject.utils.passphrase.phrase}\`\nAdd this to your note when applying to the group in-game!`,
+                    content: contentMessage,
                     ephemeral: true,
                 });
             }
         } else if (i.customId === "cancelGroup") {
-            if (discordUserId !== interactionUserId) {
+            // The group creator can cancel the group
+            if (!userExistsInAnyRole(discordUserId, mainObject)) {
                 await i.reply({
-                    content: "Only the group leader can cancel the group!",
+                    content: "Only group members can use this!",
                     ephemeral: true,
                 });
             } else {
-                groupUtilityCollector.stop("cancelledAfterCreation");
+                if (discordUserId === interactionUserId) {
+                    await i.deferUpdate();
+                    await cancelGroup(i, groupUtilityCollector);
+                } else {
+                    const [roleName, roleData] = userExistsInAnyRole(discordUserId, mainObject);
+                    removeUserFromRole(discordUserId, mainObject, roleName, roleData);
+                    await processDungeonEmbed(
+                        i,
+                        rolesToTag,
+                        dungeonName,
+                        dungeonDifficulty,
+                        mainObject,
+                        groupUtilityCollector,
+                        "notCallUser"
+                    );
+                }
             }
         }
     });

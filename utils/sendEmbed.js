@@ -19,7 +19,7 @@ async function sendEmbed(mainObject, channel, requiredCompositionList) {
 
     // Generate a listed as string for the mainObject if the user hasn't specified one
     if (!mainObject.embedData.listedAs) {
-        mainObject.embedData.listedAs = generateListedAsString(dungeonName, dungeonDifficulty);
+        mainObject.embedData.listedAs = generateListedAsString(dungeonName);
     }
 
     // Create the object that is used to send to the embed

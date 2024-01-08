@@ -11,11 +11,21 @@ function generateRoleIcons(mainObject) {
     return roleIcons;
 }
 
-function generateListedAsString(dungeon, difficulty) {
-    const dungeonDifficulty = `${difficulty}`;
-    const dungeonAcronym = dungeonData[dungeon].acronym;
+function generateRandomLetterPair() {
+    const alphabet = "abcdefghijklmnopqrstuvwxyz";
+    let letters = "";
+    for (let i = 0; i < 2; i++) {
+        const randomIndex = Math.floor(Math.random() * alphabet.length);
+        letters += alphabet[randomIndex];
+    }
+    return letters.toUpperCase();
+}
 
-    return `NoP ${dungeonAcronym} ${dungeonDifficulty}`;
+function generateListedAsString(dungeon) {
+    const dungeonAcronym = dungeonData[dungeon].acronym;
+    const randomLetterPair = generateRandomLetterPair();
+
+    return `NoP ${dungeonAcronym} ${randomLetterPair}`;
 }
 
 function generatePassphrase(wordList, wordCount = 3) {

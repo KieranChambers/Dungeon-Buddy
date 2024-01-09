@@ -13,8 +13,7 @@ async function processError(error, interaction) {
 
         // Inform user about the timeout
         await interaction.editReply({
-            content:
-                "You did not respond in time (60s).\nPlease try the command again if you wish to create a group.",
+            content: "You did not respond in time (60s).\nPlease try the command again if you wish to create a group.",
             ephemeral: true,
             components: [],
         });
@@ -22,7 +21,7 @@ async function processError(error, interaction) {
         // Optionally send a message to the user if the error is different
         await interaction.editReply({
             content:
-                "An error occurred while processing your request.\nIf this was a mistake, please ping <@268396301928890369>",
+                "An error occurred while processing your request.\nIf this was a mistake, feel free to ping <@268396301928890369> in <#1090020015589294132>",
             ephemeral: true,
             components: [],
         });

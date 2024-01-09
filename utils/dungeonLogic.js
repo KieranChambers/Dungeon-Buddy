@@ -98,7 +98,7 @@ function getDungeonObject(dungeon, difficulty, mainObject) {
             { name: `${dpsEmoji} DPS`, value: `${dpsSpots || "\u200b"}`, inline: false },
         ],
         // TODO: Create a function to generate random footer tips
-        footer: { text: "Tip: The passphrase can be retrieved by using /history" },
+        // footer: { text: "" },
         status: "",
     };
     if (roleIcons.length > 4) {

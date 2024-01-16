@@ -38,7 +38,7 @@ async function sendEmbed(mainObject, channel, requiredCompositionList) {
         componentType: ComponentType.Button,
         time: 1_800_000, // Wait 30 minutes to form a group before timing out
     });
-    // TODO: Fix the vars
+
     groupUtilityCollector.on("collect", async (i) => {
         const discordUserId = `<@${i.user.id}>`;
         const discordNickname = i.member.nickname != null ? i.member.nickname : i.user.globalName;

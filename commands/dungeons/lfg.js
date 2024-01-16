@@ -201,7 +201,9 @@ module.exports = {
                         } else {
                             // Add the user to the main object
                             mainObject.roles[userChosenRole].spots.push(mainObject.interactionUser.userId);
-                            mainObject.roles[userChosenRole].nicknames.push(mainObject.interactionUser.nickname);
+                            mainObject.roles[userChosenRole].nicknames.push(
+                                mainObject.interactionUser.nickname + "  (creator)"
+                            );
 
                             // Pull the filled spot from the main object
                             const filledSpot = mainObject.embedData.filledSpot;

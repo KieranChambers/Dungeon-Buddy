@@ -110,7 +110,7 @@ function userExistsInAnyRole(userId, mainObject) {
 function addUserToRole(userId, userNickname, mainObject, newRole) {
     if (userId === mainObject.interactionUser.userId) {
         mainObject.roles[newRole].spots.push(mainObject.embedData.filledSpot);
-        mainObject.roles[newRole].nicknames.push(userNickname);
+        mainObject.roles[newRole].nicknames.push(mainObject.embedData.filledSpot);
         updateButtonState(mainObject, newRole);
         return "interactionUser";
     } else {

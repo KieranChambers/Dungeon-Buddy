@@ -1,6 +1,7 @@
 const { ButtonStyle } = require("discord.js");
 const { generatePassphrase } = require("./utilFunctions");
 const { wowWords } = require("./loadJson.js");
+const { tankEmoji, healerEmoji, dpsEmoji } = require("../config.js");
 
 function getMainObject(interaction) {
     const mainObject = {
@@ -11,7 +12,7 @@ function getMainObject(interaction) {
                 style: ButtonStyle.Secondary,
                 disabled: false,
                 customId: "Tank",
-                emoji: `<:tankrole:1193998691200159754>`,
+                emoji: tankEmoji,
             },
             Healer: {
                 spots: [],
@@ -19,7 +20,7 @@ function getMainObject(interaction) {
                 style: ButtonStyle.Secondary,
                 disabled: false,
                 customId: "Healer",
-                emoji: `<:healerrole:1193998685894357172>`,
+                emoji: healerEmoji,
             },
             DPS: {
                 spots: [],
@@ -27,15 +28,15 @@ function getMainObject(interaction) {
                 style: ButtonStyle.Secondary,
                 disabled: false,
                 customId: "DPS",
-                emoji: `<:dpsrole:1193998689056870430>`,
+                emoji: dpsEmoji,
             },
             DPS2: {
                 customId: "DPS2",
-                emoji: `<:dpsrole:1193998689056870430>`,
+                emoji: dpsEmoji,
             },
             DPS3: {
                 customId: "DPS3",
-                emoji: `<:dpsrole:1193998689056870430>`,
+                emoji: dpsEmoji,
             },
         },
         embedData: {

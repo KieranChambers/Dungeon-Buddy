@@ -90,8 +90,9 @@ function updateButtonState(mainObject, roleName) {
     }
 }
 
-function removeUserFromRole(userId, mainObject, roleName, roleData) {
+function removeUserFromRole(userId, userNickname, mainObject, roleName, roleData) {
     roleData.spots.splice(roleData.spots.indexOf(userId), 1);
+    roleData.nicknames.splice(roleData.nicknames.indexOf(userNickname), 1);
     updateButtonState(mainObject, roleName);
 }
 
@@ -106,20 +107,23 @@ function userExistsInAnyRole(userId, mainObject) {
     return false;
 }
 
-function addUserToRole(userId, mainObject, newRole) {
+function addUserToRole(userId, userNickname, mainObject, newRole) {
     if (userId === mainObject.interactionUser.userId) {
         mainObject.roles[newRole].spots.push(mainObject.embedData.filledSpot);
+        mainObject.roles[newRole].nicknames.push(userNickname);
         updateButtonState(mainObject, newRole);
         return "interactionUser";
     } else {
         if (!userExistsInAnyRole(userId, mainObject)) {
             mainObject.roles[newRole].spots.push(userId);
+            mainObject.roles[newRole].nicknames.push(userNickname);
             updateButtonState(mainObject, newRole);
             return "newUser";
         } else {
             const [roleName, roleData] = userExistsInAnyRole(userId, mainObject);
-            removeUserFromRole(userId, mainObject, roleName, roleData);
+            removeUserFromRole(userId, userNickname, mainObject, roleName, roleData);
             mainObject.roles[newRole].spots.push(userId);
+            mainObject.roles[newRole].nicknames.push(userNickname);
             updateButtonState(mainObject, newRole);
             return "existingUser";
         }

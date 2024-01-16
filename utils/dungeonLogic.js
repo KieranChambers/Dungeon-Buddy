@@ -65,16 +65,16 @@ async function processDungeonEmbed(i, rolesToTag, dungeon, difficulty, mainObjec
 
 function getDungeonObject(dungeon, difficulty, mainObject) {
     const listedAs = mainObject.embedData.listedAs;
-    const interactionUser = mainObject.interactionUser.userId;
+    const interactionUserNick = mainObject.interactionUser.nickname;
     const timedCompleted = mainObject.embedData.timedOrCompleted;
 
     const tank = mainObject.roles.Tank;
     const healer = mainObject.roles.Healer;
     const dps = mainObject.roles.DPS;
 
-    const tankSpot = tank.spots.join("\n");
-    const healerSpot = healer.spots.join("\n");
-    const dpsSpots = dps.spots.join("\n");
+    const tankNickname = tank.nicknames.join("\n");
+    const healerNickname = healer.nicknames.join("\n");
+    const dpsNicknames = dps.nicknames.join("\n");
 
     const tankEmoji = tank.emoji;
     const healerEmoji = healer.emoji;
@@ -89,13 +89,13 @@ function getDungeonObject(dungeon, difficulty, mainObject) {
         url: `${dungeonData[dungeon].wowheadStrategyUrl}`,
         image: { url: `${dungeonData[dungeon].bannerImageUrl}` },
         fields: [
-            { name: `Created by`, value: `${interactionUser}`, inline: false },
+            { name: `Created by`, value: `${interactionUserNick}`, inline: false },
             { name: `Listed as`, value: ` ${listedAs}`, inline: true },
             { name: "Timed/Completed", value: `${timedCompleted}`, inline: true },
-            { name: `${tankEmoji} Tank `, value: `${tankSpot || "\u200b"}`, inline: false },
+            { name: `${tankEmoji} Tank `, value: `${tankNickname || "\u200b"}`, inline: false },
 
-            { name: `${healerEmoji} Healer`, value: `${healerSpot || "\u200b"}`, inline: false },
-            { name: `${dpsEmoji} DPS`, value: `${dpsSpots || "\u200b"}`, inline: false },
+            { name: `${healerEmoji} Healer`, value: `${healerNickname || "\u200b"}`, inline: false },
+            { name: `${dpsEmoji} DPS`, value: `${dpsNicknames || "\u200b"}`, inline: false },
         ],
         // TODO: Create a function to generate random footer tips
         // footer: { text: "" },

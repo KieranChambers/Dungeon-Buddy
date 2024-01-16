@@ -201,6 +201,7 @@ module.exports = {
                         } else {
                             // Add the user to the main object
                             mainObject.roles[userChosenRole].spots.push(mainObject.interactionUser.userId);
+                            mainObject.roles[userChosenRole].nicknames.push(mainObject.interactionUser.nickname);
 
                             // Pull the filled spot from the main object
                             const filledSpot = mainObject.embedData.filledSpot;
@@ -212,9 +213,11 @@ module.exports = {
                                         if (isDPSRole(role)) {
                                             if (mainObject.roles["DPS"].spots.length < 3) {
                                                 mainObject.roles["DPS"].spots.push(filledSpot);
+                                                mainObject.roles["DPS"].nicknames.push(filledSpot);
                                             }
                                         } else {
                                             mainObject.roles[role].spots.push(filledSpot);
+                                            mainObject.roles["DPS"].nicknames.push(filledSpot);
                                         }
                                     }
 

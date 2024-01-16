@@ -7,6 +7,7 @@ function getMainObject(interaction) {
         roles: {
             Tank: {
                 spots: [],
+                nicknames: [],
                 style: ButtonStyle.Secondary,
                 disabled: false,
                 customId: "Tank",
@@ -14,6 +15,7 @@ function getMainObject(interaction) {
             },
             Healer: {
                 spots: [],
+                nicknames: [],
                 style: ButtonStyle.Secondary,
                 disabled: false,
                 customId: "Healer",
@@ -21,6 +23,7 @@ function getMainObject(interaction) {
             },
             DPS: {
                 spots: [],
+                nicknames: [],
                 style: ButtonStyle.Secondary,
                 disabled: false,
                 customId: "DPS",
@@ -46,6 +49,7 @@ function getMainObject(interaction) {
         interactionId: interaction.id,
         interactionUser: {
             userId: `<@${interaction.user.id}>`,
+            nickname: interaction.member.nickname != null ? interaction.member.nickname : interaction.user.globalName,
             userChosenRole: "",
         },
         utils: {

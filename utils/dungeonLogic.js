@@ -66,6 +66,7 @@ async function processDungeonEmbed(i, rolesToTag, dungeon, difficulty, mainObjec
 function getDungeonObject(dungeon, difficulty, mainObject) {
     const listedAs = mainObject.embedData.listedAs;
     const timedCompleted = mainObject.embedData.timedOrCompleted;
+    const creatorNotes = mainObject.embedData.creatorNotes;
 
     const tank = mainObject.roles.Tank;
     const healer = mainObject.roles.Healer;
@@ -82,27 +83,32 @@ function getDungeonObject(dungeon, difficulty, mainObject) {
     const roleIcons = generateRoleIcons(mainObject);
     const joinedRoleIcons = roleIcons.join(" ");
 
+    // Allows us to build fields conditionally
+    let fields = [
+        { name: `Key`, value: `${dungeon} ${difficulty}`, inline: true },
+        { name: "Timed/Completed", value: `${timedCompleted}`, inline: true },
+        ...(creatorNotes ? [{ name: "Creator Notes", value: `${creatorNotes}`, inline: false }] : []),
+        { name: `${tankEmoji} Tank `, value: `${tankNickname || "\u200b"}`, inline: false },
+        { name: `${healerEmoji} Healer`, value: `${healerNickname || "\u200b"}`, inline: false },
+        { name: `${dpsEmoji} DPS`, value: `${dpsNicknames || "\u200b"}`, inline: false },
+    ];
+
     const dungeonObject = {
         color: 0x3c424b,
         title: `${listedAs}  ${joinedRoleIcons}`,
         image: { url: `${dungeonData[dungeon].bannerImageUrl}` },
-        fields: [
-            { name: `Key`, value: `${dungeon} ${difficulty}`, inline: true },
-            { name: "Timed/Completed", value: `${timedCompleted}`, inline: true },
-            { name: `${tankEmoji} Tank `, value: `${tankNickname || "\u200b"}`, inline: false },
-
-            { name: `${healerEmoji} Healer`, value: `${healerNickname || "\u200b"}`, inline: false },
-            { name: `${dpsEmoji} DPS`, value: `${dpsNicknames || "\u200b"}`, inline: false },
-        ],
+        fields: fields,
         // TODO: Create a function to generate random footer tips
         // footer: { text: "" },
         status: "",
     };
+
     if (roleIcons.length > 4) {
         dungeonObject.title += " (FULL)";
         dungeonObject.image = null;
         dungeonObject.status = "full";
     }
+
     return dungeonObject;
 }
 

@@ -23,6 +23,12 @@ module.exports = {
                 .setName("listed_as")
                 .setDescription("Specify a listed as name for your dungeon. Otherwise one will be generated for you.")
                 .setRequired(false)
+        )
+        .addStringOption((option) =>
+            option
+                .setName("creator_notes")
+                .setDescription("Add some additional information about your group.")
+                .setRequired(false)
         ),
     async execute(interaction) {
         const mainObject = getMainObject(interaction);
@@ -31,6 +37,10 @@ module.exports = {
         const listedAs = interaction.options.getString("listed_as");
         if (listedAs) {
             mainObject.embedData.listedAs = listedAs;
+        }
+        const creatorNotes = interaction.options.getString("creator_notes");
+        if (creatorNotes) {
+            mainObject.embedData.creatorNotes = creatorNotes;
         }
 
         // Timeout for the interaction collector

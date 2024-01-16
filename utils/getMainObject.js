@@ -40,6 +40,7 @@ function getMainObject(interaction) {
             },
         },
         embedData: {
+            creatorNotes: "",
             dungeonName: "",
             dungeonDifficulty: "",
             timedOrCompleted: "",

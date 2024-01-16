@@ -1,3 +1,5 @@
+const { tankEmoji, healerEmoji, dpsEmoji } = require("../config");
+
 function getPastDungeonObject(dungeonInstance) {
     const dungeonValues = dungeonInstance.dataValues;
     const dungeon = dungeonValues.dungeon_name;
@@ -11,10 +13,6 @@ function getPastDungeonObject(dungeonInstance) {
         .filter((spot) => spot !== null)
         .map((spot) => spot + "\n")
         .join("");
-
-    const tankEmoji = `<:tankrole:1193998691200159754>`;
-    const healerEmoji = `<:healerrole:1193998685894357172>`;
-    const dpsEmoji = `<:dpsrole:1193998689056870430>`;
 
     const dungeonObject = {
         color: 0x3c424b,

@@ -65,7 +65,6 @@ async function processDungeonEmbed(i, rolesToTag, dungeon, difficulty, mainObjec
 
 function getDungeonObject(dungeon, difficulty, mainObject) {
     const listedAs = mainObject.embedData.listedAs;
-    const interactionUserNick = mainObject.interactionUser.nickname;
     const timedCompleted = mainObject.embedData.timedOrCompleted;
 
     const tank = mainObject.roles.Tank;
@@ -86,10 +85,8 @@ function getDungeonObject(dungeon, difficulty, mainObject) {
     const dungeonObject = {
         color: 0x3c424b,
         title: `${listedAs}  ${joinedRoleIcons}`,
-        url: `${dungeonData[dungeon].wowheadStrategyUrl}`,
         image: { url: `${dungeonData[dungeon].bannerImageUrl}` },
         fields: [
-            // { name: `Created by`, value: `${interactionUserNick}`, inline: false },
             { name: `Key`, value: `${dungeon} ${difficulty}`, inline: true },
             { name: "Timed/Completed", value: `${timedCompleted}`, inline: true },
             { name: `${tankEmoji} Tank `, value: `${tankNickname || "\u200b"}`, inline: false },

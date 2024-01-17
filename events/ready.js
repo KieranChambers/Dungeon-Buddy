@@ -1,29 +1,6 @@
 const { Events } = require("discord.js");
 const { syncTables } = require("../utils/loadDb");
 
-// TODO: Look into whether we need this in production
-// function cacheGuildMembers(client) {
-//     // Fetch and cache members for all guilds
-//     fetchAndCacheMembers(client);
-
-//     // Set an interval to refetch every hour (3600000 milliseconds)
-//     setInterval(() => fetchAndCacheMembers(client), 1800000);
-// }
-
-// function fetchAndCacheMembers(client) {
-//     console.log("Caching members...");
-//     client.guilds.cache.forEach((guild) => {
-//         guild.members
-//             .fetch()
-//             .then((members) => {
-//                 console.log(`Fetched and cached ${members.size} members for guild: ${guild.name}`);
-//             })
-//             .catch((err) => {
-//                 console.error(`Error fetching members for guild ${guild.name}: ${err}`);
-//             });
-//     });
-// }
-
 module.exports = {
     name: Events.ClientReady,
     once: true,
@@ -50,7 +27,5 @@ module.exports = {
                     console.error(`Error fetching roles for guild ${guild.name}: ${err}`);
                 });
         });
-        // TODO: Look into whether we need this in production
-        // cacheGuildMembers(client);
     },
 };

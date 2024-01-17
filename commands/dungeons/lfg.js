@@ -267,13 +267,7 @@ module.exports = {
                             }
                         }
                     } else if (i.customId === "cancel") {
-                        await createStatusEmbed("LFG cancelled by the user.", compositionResponse);
-
-                        interactionStatusTable.create({
-                            interaction_id: interaction.id,
-                            interaction_user: interaction.user.id,
-                            interaction_status: "cancelled",
-                        });
+                        confirmCollector.stop("cancelled");
                     }
                 });
 
@@ -288,6 +282,14 @@ module.exports = {
                             interaction_id: interaction.id,
                             interaction_user: interaction.user.id,
                             interaction_status: "timeoutBeforeCreation",
+                        });
+                    } else if (reason === "cancelled") {
+                        await createStatusEmbed("LFG cancelled by the user.", compositionResponse);
+
+                        interactionStatusTable.create({
+                            interaction_id: interaction.id,
+                            interaction_user: interaction.user.id,
+                            interaction_status: "cancelled",
                         });
                     }
                 });

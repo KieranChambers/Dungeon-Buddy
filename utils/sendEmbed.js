@@ -126,10 +126,7 @@ async function sendEmbed(mainObject, channel, requiredCompositionList) {
     groupUtilityCollector.on("end", async (collected, reason) => {
         if (reason === "time") {
             try {
-                await createStatusEmbed(
-                    "Group creation timed out! (30 mins have passed without a full group forming)",
-                    sentEmbed
-                );
+                await createStatusEmbed("Group creation timed out! (30 mins have passed).", sentEmbed);
                 // Update the interaction status to "timed out"
                 await interactionStatusTable.update(
                     { interaction_status: "timeoutAfterCreation" },

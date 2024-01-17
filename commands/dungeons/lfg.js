@@ -229,7 +229,7 @@ module.exports = {
                                             }
                                         } else {
                                             mainObject.roles[role].spots.push(filledSpot);
-                                            mainObject.roles["DPS"].nicknames.push(filledSpot);
+                                            mainObject.roles[role].nicknames.push(filledSpot);
                                         }
                                     }
 

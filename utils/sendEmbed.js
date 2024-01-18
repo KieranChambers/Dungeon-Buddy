@@ -141,7 +141,7 @@ async function sendEmbed(mainObject, channel, requiredCompositionList) {
                 await dungeonInstanceTable.create({
                     dungeon_name: mainObject.embedData.dungeonName,
                     dungeon_difficulty: mainObject.embedData.dungeonDifficulty,
-                    timed_completed: mainObject.embedData.timedOrCompleted,
+                    timed_completed: mainObject.embedData.timeOrCompletion, // TODO: Change this to new names
                     passphrase: mainObject.utils.passphrase.phrase,
                     interaction_user: mainObject.interactionUser.userId,
                     user_chosen_role: mainObject.interactionUser.userChosenRole,

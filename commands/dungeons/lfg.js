@@ -80,14 +80,14 @@ module.exports = {
                 )
             );
 
-        const selectTimedCompleted = new StringSelectMenuBuilder()
-            .setCustomId("timedCompleted")
-            .setPlaceholder("Is the goal to time or complete the dungeon?")
+        const selectTimeCompletion = new StringSelectMenuBuilder()
+            .setCustomId("timeCompletion")
+            .setPlaceholder("Time/Completion?")
             .setMinValues(1)
             .setMaxValues(1)
             .addOptions(
-                new StringSelectMenuOptionBuilder().setLabel("Timed").setValue("Timed"),
-                new StringSelectMenuOptionBuilder().setLabel("Completed").setValue("Completed")
+                new StringSelectMenuOptionBuilder().setLabel("Time").setValue("Time"),
+                new StringSelectMenuOptionBuilder().setLabel("Completion").setValue("Completion")
             );
 
         const selectUserRole = new StringSelectMenuBuilder()
@@ -112,7 +112,7 @@ module.exports = {
 
         const dungeonRow = new ActionRowBuilder().addComponents(selectDungeon);
         const difficultyRow = new ActionRowBuilder().addComponents(selectDifficulty);
-        const timedCompletedRow = new ActionRowBuilder().addComponents(selectTimedCompleted);
+        const timeCompletionRow = new ActionRowBuilder().addComponents(selectTimeCompletion);
         const userRoleRow = new ActionRowBuilder().addComponents(selectUserRole);
         const confirmCancelRow = new ActionRowBuilder().addComponents(confirmSuccess, confirmCancel);
 
@@ -146,21 +146,21 @@ module.exports = {
                 const dungeonDifficulty = difficultyConfirmation.values[0];
                 mainObject.embedData.dungeonDifficulty = `+${dungeonDifficulty}`;
 
-                const timedCompletedResponse = await difficultyConfirmation.update({
+                const timeCompletionResponse = await difficultyConfirmation.update({
                     content: `Dungeon: ${dungeonToRun}\nDifficulty: +${dungeonDifficulty}`,
-                    components: [timedCompletedRow],
+                    components: [timeCompletionRow],
                 });
 
-                const timedCompletedConfirmation = await timedCompletedResponse.awaitMessageComponent({
+                const timeCompletionConfirmation = await timeCompletionResponse.awaitMessageComponent({
                     filter: userFilter,
                     time: timeout,
                 });
 
-                const timedOrCompleted = timedCompletedConfirmation.values[0];
-                mainObject.embedData.timedOrCompleted = timedOrCompleted;
+                const timeOrCompletion = timeCompletionConfirmation.values[0];
+                mainObject.embedData.timeOrCompletion = timeOrCompletion;
 
-                const userRoleResponse = await timedCompletedConfirmation.update({
-                    content: `Dungeon: ${dungeonToRun}\nDifficulty: +${dungeonDifficulty}\nTimed/Completed: ${timedOrCompleted}`,
+                const userRoleResponse = await timeCompletionConfirmation.update({
+                    content: `Dungeon: ${dungeonToRun}\nDifficulty: +${dungeonDifficulty}\nTime/Completion: ${timeOrCompletion}`,
                     components: [userRoleRow],
                 });
 
@@ -179,7 +179,7 @@ module.exports = {
                 const teamCompositionRow = new ActionRowBuilder().addComponents(selectComposition);
 
                 const compositionResponse = await userRoleConfirmation.update({
-                    content: `Dungeon: ${dungeonToRun}\nDifficulty: +${dungeonDifficulty}\nTimed/Completed: ${timedOrCompleted}\nYour role: ${userChosenRole}\nRequired roles:`,
+                    content: `Dungeon: ${dungeonToRun}\nDifficulty: +${dungeonDifficulty}\nTime/Completion: ${timeOrCompletion}\nYour role: ${userChosenRole}\nRequired roles:`,
                     components: [teamCompositionRow, confirmCancelRow],
                 });
 
@@ -203,7 +203,7 @@ module.exports = {
                         if (!dungeonCompositionList) {
                             // If the user didn't select any roles display a warning message
                             await compositionResponse.edit({
-                                content: `Dungeon: ${dungeonToRun}\nDifficulty: +${dungeonDifficulty}\nTimed/Completed: ${timedOrCompleted}\nYour role: ${userChosenRole}\nRequired roles:\n**Please select at least one role!**`,
+                                content: `Dungeon: ${dungeonToRun}\nDifficulty: +${dungeonDifficulty}\nTime/Completion: ${timeOrCompletion}\nYour role: ${userChosenRole}\nRequired roles:\n**Please select at least one role!**`,
                                 components: [teamCompositionRow, confirmCancelRow],
                             });
 
@@ -212,7 +212,7 @@ module.exports = {
                             // Add the user to the main object
                             mainObject.roles[userChosenRole].spots.push(mainObject.interactionUser.userId);
                             mainObject.roles[userChosenRole].nicknames.push(
-                                mainObject.interactionUser.nickname + "  (creator)"
+                                mainObject.interactionUser.nickname + " 🚩"
                             );
 
                             // Pull the filled spot from the main object

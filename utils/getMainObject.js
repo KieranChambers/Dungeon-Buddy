@@ -43,7 +43,7 @@ function getMainObject(interaction) {
             creatorNotes: "",
             dungeonName: "",
             dungeonDifficulty: "",
-            timedOrCompleted: "",
+            timeOrCompletion: "",
             listedAs: "",
             spotIcons: [],
             filledSpot: "~~Filled Spot~~",

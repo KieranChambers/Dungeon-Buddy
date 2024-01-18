@@ -65,7 +65,7 @@ async function processDungeonEmbed(i, rolesToTag, dungeon, difficulty, mainObjec
 
 function getDungeonObject(dungeon, difficulty, mainObject) {
     const listedAs = mainObject.embedData.listedAs;
-    const timedCompleted = mainObject.embedData.timedOrCompleted;
+    const timeCompletion = mainObject.embedData.timeOrCompletion;
     const creatorNotes = mainObject.embedData.creatorNotes;
 
     const tank = mainObject.roles.Tank;
@@ -74,7 +74,7 @@ function getDungeonObject(dungeon, difficulty, mainObject) {
 
     const tankNickname = tank.nicknames.join("\n");
     const healerNickname = healer.nicknames.join("\n");
-    const dpsNicknames = dps.nicknames.join("\n");
+    const dpsNicknames = dps.nicknames.join(`\n${dps.emoji} `);
 
     const tankEmoji = tank.emoji;
     const healerEmoji = healer.emoji;
@@ -85,27 +85,26 @@ function getDungeonObject(dungeon, difficulty, mainObject) {
 
     // Allows us to build fields conditionally
     let fields = [
-        { name: `Key`, value: `${dungeon} ${difficulty}`, inline: true },
-        { name: "Timed/Completed", value: `${timedCompleted}`, inline: true },
-        ...(creatorNotes ? [{ name: "Creator Notes", value: `${creatorNotes}`, inline: false }] : []),
-        { name: `${tankEmoji} Tank `, value: `${tankNickname || "\u200b"}`, inline: false },
-        { name: `${healerEmoji} Healer`, value: `${healerNickname || "\u200b"}`, inline: false },
-        { name: `${dpsEmoji} DPS`, value: `${dpsNicknames || "\u200b"}`, inline: false },
+        { name: `${dungeon} ${difficulty} (${timeCompletion})`, value: ``, inline: true },
+        ...(creatorNotes ? [{ name: `"${creatorNotes}"`, value: ``, inline: false }] : []),
+        {
+            name: `${tankEmoji} ${tankNickname || "\u200b"}\n${healerEmoji} ${
+                healerNickname || "\u200b"
+            }\n${dpsEmoji} ${dpsNicknames || "\u200b"}`,
+            value: ``,
+            inline: false,
+        },
     ];
 
     const dungeonObject = {
         color: 0x3c424b,
         title: `${listedAs}  ${joinedRoleIcons}`,
-        image: { url: `${dungeonData[dungeon].bannerImageUrl}` },
         fields: fields,
-        // TODO: Create a function to generate random footer tips
-        // footer: { text: "" },
         status: "",
     };
 
     if (roleIcons.length > 4) {
         dungeonObject.title += " (FULL)";
-        dungeonObject.image = null;
         dungeonObject.status = "full";
     }
 

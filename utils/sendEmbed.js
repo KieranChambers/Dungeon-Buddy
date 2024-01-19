@@ -41,7 +41,7 @@ async function sendEmbed(mainObject, channel, requiredCompositionList) {
 
     groupUtilityCollector.on("collect", async (i) => {
         const discordUserId = `<@${i.user.id}>`;
-        const discordNickname = i.member.nickname != null ? i.member.nickname : i.user.globalName;
+        const discordNickname = i.member.nickname || i.user.globalName || i.user.username;
 
         if (i.customId === "Tank") {
             const callUser = addUserToRole(discordUserId, discordNickname, mainObject, "Tank");

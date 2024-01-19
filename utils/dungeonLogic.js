@@ -5,7 +5,6 @@ const {
     StringSelectMenuOptionBuilder,
     ButtonStyle,
 } = require("discord.js");
-const { dungeonData } = require("./loadJson");
 const { createButton } = require("./discordFunctions");
 const { generateRoleIcons, sendPassphraseToUser } = require("./utilFunctions");
 
@@ -88,9 +87,7 @@ function getDungeonObject(dungeon, difficulty, mainObject) {
         { name: `${dungeon} ${difficulty} (${timeCompletion})`, value: ``, inline: true },
         ...(creatorNotes ? [{ name: `"${creatorNotes}"`, value: ``, inline: false }] : []),
         {
-            name: `${tankEmoji} ${tankNickname || "\u200b"}\n${healerEmoji} ${
-                healerNickname || "\u200b"
-            }\n${dpsEmoji} ${dpsNicknames || "\u200b"}`,
+            name: `${tankEmoji} ${tankNickname}\n${healerEmoji} ${healerNickname}\n${dpsEmoji} ${dpsNicknames}`,
             value: ``,
             inline: false,
         },

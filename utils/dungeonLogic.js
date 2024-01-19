@@ -87,8 +87,8 @@ function getDungeonObject(dungeon, difficulty, mainObject) {
         { name: `${dungeon} ${difficulty} (${timeCompletion})`, value: ``, inline: true },
         ...(creatorNotes ? [{ name: `"${creatorNotes}"`, value: ``, inline: false }] : []),
         {
-            name: `${tankEmoji} ${tankNickname}\n${healerEmoji} ${healerNickname}\n${dpsEmoji} ${dpsNicknames}`,
-            value: ``,
+            name: ``,
+            value: `**${tankEmoji} ${tankNickname}\n${healerEmoji} ${healerNickname}\n${dpsEmoji} ${dpsNicknames}**`,
             inline: false,
         },
     ];

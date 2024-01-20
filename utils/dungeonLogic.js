@@ -82,16 +82,23 @@ function getDungeonObject(dungeon, difficulty, mainObject) {
     const roleIcons = generateRoleIcons(mainObject);
     const joinedRoleIcons = roleIcons.join(" ");
 
-    // Allows us to build fields conditionally
-    let fields = [
-        { name: `${dungeon} ${difficulty} (${timeCompletion})`, value: ``, inline: true },
-        ...(creatorNotes ? [{ name: `"${creatorNotes}"`, value: ``, inline: false }] : []),
-        {
-            name: ``,
-            value: `**${tankEmoji} ${tankNickname}\n${healerEmoji} ${healerNickname}\n${dpsEmoji} ${dpsNicknames}**`,
-            inline: false,
-        },
-    ];
+    const roleFieldValue = `${tankEmoji} ${tankNickname}\n${healerEmoji} ${healerNickname}\n${dpsEmoji} ${dpsNicknames}`;
+
+    let fields = creatorNotes
+        ? [
+              {
+                  name: `${dungeon} ${difficulty} (${timeCompletion})`,
+                  value: `**"${creatorNotes}"\n\n${roleFieldValue}**`,
+                  inline: false,
+              },
+          ]
+        : [
+              {
+                  name: `${dungeon} ${difficulty} (${timeCompletion})`,
+                  value: `**\n${roleFieldValue}**`,
+                  inline: false,
+              },
+          ];
 
     const dungeonObject = {
         color: 0x3c424b,

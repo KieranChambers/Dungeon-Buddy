@@ -9,6 +9,7 @@ const {
 const { dungeonInstanceTable, interactionStatusTable } = require("./loadDb");
 const { processDungeonEmbed, getDungeonObject, getDungeonButtonRow, cancelGroup } = require("./dungeonLogic");
 const { processEmbedError, createStatusEmbed } = require("./errorHandling");
+const { dungeonData } = require("./loadJson.js");
 
 async function sendEmbed(mainObject, channel, requiredCompositionList) {
     const { dungeonName, dungeonDifficulty } = mainObject.embedData;
@@ -29,7 +30,7 @@ async function sendEmbed(mainObject, channel, requiredCompositionList) {
     const embedButtonRow = getDungeonButtonRow(mainObject);
 
     const sentEmbed = await channel.send({
-        content: `${rolesToTag}`,
+        content: `${dungeonData[dungeonName].acronym} ${dungeonDifficulty} - ${rolesToTag}`,
         embeds: [dungeonObject],
         components: [embedButtonRow],
     });

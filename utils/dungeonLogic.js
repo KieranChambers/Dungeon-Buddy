@@ -88,7 +88,7 @@ function getDungeonObject(dungeon, difficulty, mainObject) {
         ? [
               {
                   name: `${dungeon} ${difficulty} (${timeCompletion})`,
-                  value: `**"${creatorNotes}"\n\n${roleFieldValue}**`,
+                  value: `** \n"${creatorNotes}"\n\n${roleFieldValue}**`,
                   inline: false,
               },
           ]

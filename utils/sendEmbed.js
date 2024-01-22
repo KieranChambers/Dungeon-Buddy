@@ -45,6 +45,12 @@ async function sendEmbed(mainObject, channel, requiredCompositionList) {
         const discordNickname = i.member.nickname || i.user.globalName || i.user.username;
 
         if (i.customId === "Tank") {
+            if (mainObject.roles.Tank.inProgress) {
+                i.deferUpdate();
+                return;
+            }
+            mainObject.roles.Tank.inProgress = true;
+
             const callUser = addUserToRole(discordUserId, discordNickname, mainObject, "Tank");
             await processDungeonEmbed(
                 i,
@@ -55,7 +61,15 @@ async function sendEmbed(mainObject, channel, requiredCompositionList) {
                 groupUtilityCollector,
                 callUser
             );
+
+            mainObject.roles.Tank.inProgress = false;
         } else if (i.customId === "Healer") {
+            if (mainObject.roles.Healer.inProgress) {
+                i.deferUpdate();
+                return;
+            }
+            mainObject.roles.Healer.inProgress = true;
+
             const callUser = addUserToRole(discordUserId, discordNickname, mainObject, "Healer");
             await processDungeonEmbed(
                 i,
@@ -66,8 +80,22 @@ async function sendEmbed(mainObject, channel, requiredCompositionList) {
                 groupUtilityCollector,
                 callUser
             );
+
+            mainObject.roles.Healer.inProgress = false;
         } else if (i.customId === "DPS") {
+            if (mainObject.roles.DPS.inProgress) {
+                i.deferUpdate();
+                return;
+            }
+            mainObject.roles.DPS.inProgress = true;
+
             const callUser = addUserToRole(discordUserId, discordNickname, mainObject, "DPS");
+            if (callUser === "sameRole") {
+                i.deferUpdate();
+                mainObject.roles.DPS.inProgress = false;
+                return;
+            }
+
             await processDungeonEmbed(
                 i,
                 rolesToTag,
@@ -77,6 +105,8 @@ async function sendEmbed(mainObject, channel, requiredCompositionList) {
                 groupUtilityCollector,
                 callUser
             );
+
+            mainObject.roles.DPS.inProgress = false;
         } else if (i.customId === "getPassphrase") {
             // Confirm the user is in the group
             if (!userExistsInAnyRole(discordUserId, mainObject)) {

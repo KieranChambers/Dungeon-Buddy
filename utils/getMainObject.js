@@ -9,6 +9,7 @@ function getMainObject(interaction) {
             Tank: {
                 spots: [],
                 nicknames: [],
+                inProgress: false,
                 style: ButtonStyle.Secondary,
                 disabled: false,
                 customId: "Tank",
@@ -17,6 +18,7 @@ function getMainObject(interaction) {
             Healer: {
                 spots: [],
                 nicknames: [],
+                inProgress: false,
                 style: ButtonStyle.Secondary,
                 disabled: false,
                 customId: "Healer",
@@ -25,6 +27,7 @@ function getMainObject(interaction) {
             DPS: {
                 spots: [],
                 nicknames: [],
+                inProgress: false,
                 style: ButtonStyle.Secondary,
                 disabled: false,
                 customId: "DPS",

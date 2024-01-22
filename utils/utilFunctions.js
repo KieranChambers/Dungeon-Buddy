@@ -121,6 +121,9 @@ function addUserToRole(userId, userNickname, mainObject, newRole) {
             return "newUser";
         } else {
             const [roleName, roleData] = userExistsInAnyRole(userId, mainObject);
+            if (roleName === newRole) {
+                return "sameRole";
+            }
             removeUserFromRole(userId, userNickname, mainObject, roleName, roleData);
             mainObject.roles[newRole].spots.push(userId);
             mainObject.roles[newRole].nicknames.push(userNickname);

@@ -5,7 +5,6 @@ const {
     StringSelectMenuOptionBuilder,
     ButtonStyle,
 } = require("discord.js");
-const { dungeonData } = require("./loadJson");
 const { createButton } = require("./discordFunctions");
 const { generateRoleIcons, sendPassphraseToUser } = require("./utilFunctions");
 
@@ -65,16 +64,16 @@ async function processDungeonEmbed(i, rolesToTag, dungeon, difficulty, mainObjec
 
 function getDungeonObject(dungeon, difficulty, mainObject) {
     const listedAs = mainObject.embedData.listedAs;
-    const interactionUser = mainObject.interactionUser.userId;
-    const timedCompleted = mainObject.embedData.timedOrCompleted;
+    const timeCompletion = mainObject.embedData.timeOrCompletion;
+    const creatorNotes = mainObject.embedData.creatorNotes;
 
     const tank = mainObject.roles.Tank;
     const healer = mainObject.roles.Healer;
     const dps = mainObject.roles.DPS;
 
-    const tankSpot = tank.spots.join("\n");
-    const healerSpot = healer.spots.join("\n");
-    const dpsSpots = dps.spots.join("\n");
+    const tankNickname = tank.nicknames.join("\n");
+    const healerNickname = healer.nicknames.join("\n");
+    const dpsNicknames = dps.nicknames.join(`\n${dps.emoji} `);
 
     const tankEmoji = tank.emoji;
     const healerEmoji = healer.emoji;
@@ -83,29 +82,36 @@ function getDungeonObject(dungeon, difficulty, mainObject) {
     const roleIcons = generateRoleIcons(mainObject);
     const joinedRoleIcons = roleIcons.join(" ");
 
+    const roleFieldValue = `${tankEmoji} ${tankNickname}\n${healerEmoji} ${healerNickname}\n${dpsEmoji} ${dpsNicknames}`;
+
+    let fields = creatorNotes
+        ? [
+              {
+                  name: `${dungeon} ${difficulty} (${timeCompletion})`,
+                  value: `** \n"${creatorNotes}"\n\n${roleFieldValue}**`,
+                  inline: false,
+              },
+          ]
+        : [
+              {
+                  name: `${dungeon} ${difficulty} (${timeCompletion})`,
+                  value: `**\n${roleFieldValue}**`,
+                  inline: false,
+              },
+          ];
+
     const dungeonObject = {
         color: 0x3c424b,
-        title: `${dungeon} ${difficulty}  ${joinedRoleIcons}`,
-        url: `${dungeonData[dungeon].wowheadStrategyUrl}`,
-        image: { url: `${dungeonData[dungeon].bannerImageUrl}` },
-        fields: [
-            { name: `Created by`, value: `${interactionUser}`, inline: false },
-            { name: `Listed as`, value: ` ${listedAs}`, inline: true },
-            { name: "Timed/Completed", value: `${timedCompleted}`, inline: true },
-            { name: `${tankEmoji} Tank `, value: `${tankSpot || "\u200b"}`, inline: false },
-
-            { name: `${healerEmoji} Healer`, value: `${healerSpot || "\u200b"}`, inline: false },
-            { name: `${dpsEmoji} DPS`, value: `${dpsSpots || "\u200b"}`, inline: false },
-        ],
-        // TODO: Create a function to generate random footer tips
-        // footer: { text: "" },
+        title: `${listedAs}  ${joinedRoleIcons}`,
+        fields: fields,
         status: "",
     };
+
     if (roleIcons.length > 4) {
         dungeonObject.title += " (FULL)";
-        dungeonObject.image = null;
         dungeonObject.status = "full";
     }
+
     return dungeonObject;
 }
 

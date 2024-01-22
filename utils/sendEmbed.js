@@ -9,6 +9,7 @@ const {
 const { dungeonInstanceTable, interactionStatusTable } = require("./loadDb");
 const { processDungeonEmbed, getDungeonObject, getDungeonButtonRow, cancelGroup } = require("./dungeonLogic");
 const { processEmbedError, createStatusEmbed } = require("./errorHandling");
+const { dungeonData } = require("./loadJson.js");
 
 async function sendEmbed(mainObject, channel, requiredCompositionList) {
     const { dungeonName, dungeonDifficulty } = mainObject.embedData;
@@ -29,7 +30,7 @@ async function sendEmbed(mainObject, channel, requiredCompositionList) {
     const embedButtonRow = getDungeonButtonRow(mainObject);
 
     const sentEmbed = await channel.send({
-        content: `${rolesToTag}`,
+        content: `${dungeonData[dungeonName].acronym} ${dungeonDifficulty} - ${rolesToTag}`,
         embeds: [dungeonObject],
         components: [embedButtonRow],
     });
@@ -41,8 +42,16 @@ async function sendEmbed(mainObject, channel, requiredCompositionList) {
 
     groupUtilityCollector.on("collect", async (i) => {
         const discordUserId = `<@${i.user.id}>`;
+        const discordNickname = i.member.nickname || i.user.globalName || i.user.username;
+
         if (i.customId === "Tank") {
-            const callUser = addUserToRole(discordUserId, mainObject, "Tank");
+            if (mainObject.roles.Tank.inProgress) {
+                i.deferUpdate();
+                return;
+            }
+            mainObject.roles.Tank.inProgress = true;
+
+            const callUser = addUserToRole(discordUserId, discordNickname, mainObject, "Tank");
             await processDungeonEmbed(
                 i,
                 rolesToTag,
@@ -52,8 +61,16 @@ async function sendEmbed(mainObject, channel, requiredCompositionList) {
                 groupUtilityCollector,
                 callUser
             );
+
+            mainObject.roles.Tank.inProgress = false;
         } else if (i.customId === "Healer") {
-            const callUser = addUserToRole(discordUserId, mainObject, "Healer");
+            if (mainObject.roles.Healer.inProgress) {
+                i.deferUpdate();
+                return;
+            }
+            mainObject.roles.Healer.inProgress = true;
+
+            const callUser = addUserToRole(discordUserId, discordNickname, mainObject, "Healer");
             await processDungeonEmbed(
                 i,
                 rolesToTag,
@@ -63,8 +80,22 @@ async function sendEmbed(mainObject, channel, requiredCompositionList) {
                 groupUtilityCollector,
                 callUser
             );
+
+            mainObject.roles.Healer.inProgress = false;
         } else if (i.customId === "DPS") {
-            const callUser = addUserToRole(discordUserId, mainObject, "DPS");
+            if (mainObject.roles.DPS.inProgress) {
+                i.deferUpdate();
+                return;
+            }
+            mainObject.roles.DPS.inProgress = true;
+
+            const callUser = addUserToRole(discordUserId, discordNickname, mainObject, "DPS");
+            if (callUser === "sameRole") {
+                i.deferUpdate();
+                mainObject.roles.DPS.inProgress = false;
+                return;
+            }
+
             await processDungeonEmbed(
                 i,
                 rolesToTag,
@@ -74,6 +105,8 @@ async function sendEmbed(mainObject, channel, requiredCompositionList) {
                 groupUtilityCollector,
                 callUser
             );
+
+            mainObject.roles.DPS.inProgress = false;
         } else if (i.customId === "getPassphrase") {
             // Confirm the user is in the group
             if (!userExistsInAnyRole(discordUserId, mainObject)) {
@@ -106,7 +139,7 @@ async function sendEmbed(mainObject, channel, requiredCompositionList) {
                     await cancelGroup(i, groupUtilityCollector);
                 } else {
                     const [roleName, roleData] = userExistsInAnyRole(discordUserId, mainObject);
-                    removeUserFromRole(discordUserId, mainObject, roleName, roleData);
+                    removeUserFromRole(discordUserId, discordNickname, mainObject, roleName, roleData);
                     await processDungeonEmbed(
                         i,
                         rolesToTag,
@@ -124,10 +157,7 @@ async function sendEmbed(mainObject, channel, requiredCompositionList) {
     groupUtilityCollector.on("end", async (collected, reason) => {
         if (reason === "time") {
             try {
-                await createStatusEmbed(
-                    "Group creation timed out! (30 mins have passed without a full group forming)",
-                    sentEmbed
-                );
+                await createStatusEmbed("Group creation timed out! (30 mins have passed).", sentEmbed);
                 // Update the interaction status to "timed out"
                 await interactionStatusTable.update(
                     { interaction_status: "timeoutAfterCreation" },
@@ -142,7 +172,7 @@ async function sendEmbed(mainObject, channel, requiredCompositionList) {
                 await dungeonInstanceTable.create({
                     dungeon_name: mainObject.embedData.dungeonName,
                     dungeon_difficulty: mainObject.embedData.dungeonDifficulty,
-                    timed_completed: mainObject.embedData.timedOrCompleted,
+                    timed_completed: mainObject.embedData.timeOrCompletion, // TODO: Change this to new names
                     passphrase: mainObject.utils.passphrase.phrase,
                     interaction_user: mainObject.interactionUser.userId,
                     user_chosen_role: mainObject.interactionUser.userChosenRole,

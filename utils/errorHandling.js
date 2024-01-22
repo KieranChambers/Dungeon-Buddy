@@ -45,7 +45,7 @@ async function processSendEmbedError(error, reason, userId) {
 }
 
 async function createStatusEmbed(statusMessage, embedMessage) {
-    const contactMessage = `\nPlease try /lfg again if you wish to create a group.\n\nIf this was a mistake, please ping <@268396301928890369>`;
+    const contactMessage = `\nPlease try /lfg again if you wish to create a group.`;
 
     await embedMessage.edit({
         content: statusMessage + contactMessage,

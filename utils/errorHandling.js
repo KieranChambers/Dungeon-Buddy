@@ -52,6 +52,11 @@ async function createStatusEmbed(statusMessage, embedMessage) {
         embeds: [],
         components: [],
     });
+
+    // Automatically delete the status embed after 5 mins
+    setTimeout(async () => {
+        await embedMessage.delete();
+    }, 300_000);
 }
 
 module.exports = { processError, processSendEmbedError, createStatusEmbed };

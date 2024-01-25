@@ -44,19 +44,35 @@ async function processSendEmbedError(error, reason, userId) {
     });
 }
 
+let deleteTimeouts = new Map();
+
 async function createStatusEmbed(statusMessage, embedMessage) {
     const contactMessage = `\nPlease try /lfg again if you wish to create a group.`;
 
-    await embedMessage.edit({
-        content: statusMessage + contactMessage,
-        embeds: [],
-        components: [],
-    });
+    await embedMessage
+        .edit({
+            content: statusMessage + contactMessage,
+            embeds: [],
+            components: [],
+        })
+        .catch(console.error);
+
+    // Clear any previous timeout for this message
+    if (deleteTimeouts.has(embedMessage.id)) {
+        clearTimeout(deleteTimeouts.get(embedMessage.id));
+        deleteTimeouts.delete(embedMessage.id);
+    }
 
     // Automatically delete the status embed after 5 mins
-    setTimeout(async () => {
-        await embedMessage.delete();
+    const timeout = setTimeout(async () => {
+        if (embedMessage.deletable) {
+            await embedMessage.delete().catch(console.error);
+        }
+        deleteTimeouts.delete(embedMessage.id); // Remove from the map once deleted
     }, 300_000);
+
+    // Store the timeout ID
+    deleteTimeouts.set(embedMessage.id, timeout);
 }
 
 module.exports = { processError, processSendEmbedError, createStatusEmbed };

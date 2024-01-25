@@ -37,7 +37,7 @@ async function processDungeonEmbed(i, rolesToTag, dungeon, difficulty, mainObjec
     const newDungeonObject = getDungeonObject(dungeon, difficulty, mainObject);
     if (newDungeonObject.status === "full") {
         await i.update({
-            content: ``,
+            content: `${mainObject.embedData.dungeonName} ${mainObject.embedData.dungeonDifficulty} - ~~${rolesToTag}~~`,
             embeds: [newDungeonObject],
             components: [],
         });
@@ -51,7 +51,7 @@ async function processDungeonEmbed(i, rolesToTag, dungeon, difficulty, mainObjec
         const newEmbedButtonRow = getDungeonButtonRow(mainObject);
 
         await i.update({
-            content: `${rolesToTag}`,
+            content: `${mainObject.embedData.dungeonName} ${mainObject.embedData.dungeonDifficulty} - ${rolesToTag}`,
             embeds: [newDungeonObject],
             components: [newEmbedButtonRow],
         });

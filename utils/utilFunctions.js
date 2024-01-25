@@ -75,7 +75,7 @@ function parseRolesToTag(difficulty, requiredComposition, guildId) {
 
 async function sendPassphraseToUser(interaction, mainObject) {
     await interaction.followUp({
-        content: `The passphrase for the dungeon is: \`${mainObject.utils.passphrase.phrase}\`\nAdd this to your note when applying to the group in-game!`,
+        content: `The passphrase for the dungeon is: \`${mainObject.utils.passphrase.phrase}\`\nAdd this to your note when applying to \`${mainObject.embedData.listedAs}\` in-game!`,
         ephemeral: true,
     });
 }

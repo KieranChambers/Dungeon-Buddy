@@ -8,7 +8,7 @@ const {
 } = require("./utilFunctions");
 const { dungeonInstanceTable, interactionStatusTable } = require("./loadDb");
 const { processDungeonEmbed, getDungeonObject, getDungeonButtonRow, cancelGroup } = require("./dungeonLogic");
-const { processEmbedError, createStatusEmbed } = require("./errorHandling");
+const { processSendEmbedError, createStatusEmbed } = require("./errorHandling");
 const { dungeonData } = require("./loadJson.js");
 
 async function sendEmbed(mainObject, channel, requiredCompositionList) {
@@ -164,7 +164,7 @@ async function sendEmbed(mainObject, channel, requiredCompositionList) {
                     { where: { interaction_id: mainObject.interactionId } }
                 );
             } catch (e) {
-                processEmbedError(e, "Group creation timeout error", interactionUserId);
+                processSendEmbedError(e, "Group creation timeout error", interactionUserId);
             }
         } else if (reason === "finished") {
             // Send the finished dungeon data to the database
@@ -189,7 +189,7 @@ async function sendEmbed(mainObject, channel, requiredCompositionList) {
                     { where: { interaction_id: mainObject.interactionId } }
                 );
             } catch (e) {
-                processEmbedError(e, "Finished processing error", interactionUserId);
+                processSendEmbedError(e, "Finished processing error", interactionUserId);
             }
         } else if (reason === "cancelledAfterCreation") {
             // Update the embed to reflect the cancellation
@@ -202,7 +202,7 @@ async function sendEmbed(mainObject, channel, requiredCompositionList) {
                     { where: { interaction_id: mainObject.interactionId } }
                 );
             } catch (e) {
-                processEmbedError(e, "Cancelled after creation error", interactionUserId);
+                processSendEmbedError(e, "Cancelled after creation error", interactionUserId);
             }
         }
     });

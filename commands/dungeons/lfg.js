@@ -278,6 +278,7 @@ module.exports = {
                         interaction_id: interaction.id,
                         interaction_user: interaction.user.id,
                         interaction_status: "timeoutBeforeCreation",
+                        command_used: "lfg",
                     });
                 } else if (reason === "cancelled") {
                     await createStatusEmbed("LFG cancelled by the user.", compositionResponse);
@@ -286,6 +287,7 @@ module.exports = {
                         interaction_id: interaction.id,
                         interaction_user: interaction.user.id,
                         interaction_status: "cancelled",
+                        command_used: "lfg",
                     });
                 }
             });

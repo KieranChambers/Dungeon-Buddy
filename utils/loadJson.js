@@ -13,15 +13,18 @@ function getDungeonData(currentSeason) {
     const dungeonData = loadJSON(`./jsonFiles/dungeonData/season${currentSeason}.json`)[currentSeason];
 
     const dungeonList = [];
+    const acronymToNameMap = {};
+
     for (const dungeon in dungeonData) {
         dungeonList.push(dungeon);
+        acronymToNameMap[dungeonData[dungeon].acronym] = dungeon;
     }
 
-    return { dungeonData, dungeonList };
+    return { dungeonData, dungeonList, acronymToNameMap };
 }
 
 const currentSeason = getCurrentSeason();
-const { dungeonData, dungeonList } = getDungeonData(currentSeason);
+const { dungeonData, dungeonList, acronymToNameMap } = getDungeonData(currentSeason);
 const wowWords = loadJSON("./jsonFiles/wowWords.json");
 
-module.exports = { dungeonData, dungeonList, wowWords };
+module.exports = { dungeonData, dungeonList, acronymToNameMap, wowWords };

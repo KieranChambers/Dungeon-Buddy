@@ -116,187 +116,181 @@ module.exports = {
         const userRoleRow = new ActionRowBuilder().addComponents(selectUserRole);
         const confirmCancelRow = new ActionRowBuilder().addComponents(confirmSuccess, confirmCancel);
 
-        const dungeonResponse = await interaction.reply({
-            ephemeral: true,
-            components: [dungeonRow],
-        });
-
         const userFilter = (i) => i.user.id === interaction.user.id;
 
-        async function runCommandLogic() {
-            try {
-                const dungeonConfirmation = await dungeonResponse.awaitMessageComponent({
-                    filter: userFilter,
-                    time: timeout,
-                });
+        try {
+            const dungeonResponse = await interaction.reply({
+                ephemeral: true,
+                components: [dungeonRow],
+            });
 
-                const dungeonToRun = dungeonConfirmation.values[0];
-                mainObject.embedData.dungeonName = dungeonToRun;
+            const dungeonConfirmation = await dungeonResponse.awaitMessageComponent({
+                filter: userFilter,
+                time: timeout,
+            });
 
-                const difficultyResponse = await dungeonConfirmation.update({
-                    content: `Dungeon: ${dungeonToRun}.`,
-                    components: [difficultyRow],
-                });
+            const dungeonToRun = dungeonConfirmation.values[0];
+            mainObject.embedData.dungeonName = dungeonToRun;
 
-                const difficultyConfirmation = await difficultyResponse.awaitMessageComponent({
-                    filter: userFilter,
-                    time: timeout,
-                });
+            const difficultyResponse = await dungeonConfirmation.update({
+                content: `Dungeon: ${dungeonToRun}.`,
+                components: [difficultyRow],
+            });
 
-                const dungeonDifficulty = difficultyConfirmation.values[0];
-                mainObject.embedData.dungeonDifficulty = `+${dungeonDifficulty}`;
+            const difficultyConfirmation = await difficultyResponse.awaitMessageComponent({
+                filter: userFilter,
+                time: timeout,
+            });
 
-                const timeCompletionResponse = await difficultyConfirmation.update({
-                    content: `Dungeon: ${dungeonToRun}\nDifficulty: +${dungeonDifficulty}`,
-                    components: [timeCompletionRow],
-                });
+            const dungeonDifficulty = difficultyConfirmation.values[0];
+            mainObject.embedData.dungeonDifficulty = `+${dungeonDifficulty}`;
 
-                const timeCompletionConfirmation = await timeCompletionResponse.awaitMessageComponent({
-                    filter: userFilter,
-                    time: timeout,
-                });
+            const timeCompletionResponse = await difficultyConfirmation.update({
+                content: `Dungeon: ${dungeonToRun}\nDifficulty: +${dungeonDifficulty}`,
+                components: [timeCompletionRow],
+            });
 
-                const timeOrCompletion = timeCompletionConfirmation.values[0];
-                mainObject.embedData.timeOrCompletion = timeOrCompletion;
+            const timeCompletionConfirmation = await timeCompletionResponse.awaitMessageComponent({
+                filter: userFilter,
+                time: timeout,
+            });
 
-                const userRoleResponse = await timeCompletionConfirmation.update({
-                    content: `Dungeon: ${dungeonToRun}\nDifficulty: +${dungeonDifficulty}\nTime/Completion: ${timeOrCompletion}`,
-                    components: [userRoleRow],
-                });
+            const timeOrCompletion = timeCompletionConfirmation.values[0];
+            mainObject.embedData.timeOrCompletion = timeOrCompletion;
 
-                const userRoleConfirmation = await userRoleResponse.awaitMessageComponent({
-                    filter: userFilter,
-                    time: timeout,
-                });
+            const userRoleResponse = await timeCompletionConfirmation.update({
+                content: `Dungeon: ${dungeonToRun}\nDifficulty: +${dungeonDifficulty}\nTime/Completion: ${timeOrCompletion}`,
+                components: [userRoleRow],
+            });
 
-                const userChosenRole = userRoleConfirmation.values[0];
-                // Add the user's chosen role to the main object so it's easily accessible
-                mainObject.interactionUser.userChosenRole = userChosenRole;
+            const userRoleConfirmation = await userRoleResponse.awaitMessageComponent({
+                filter: userFilter,
+                time: timeout,
+            });
 
-                // Calculate the eligible composition based on the user's chosen role
-                const selectComposition = getEligibleComposition(mainObject);
+            const userChosenRole = userRoleConfirmation.values[0];
+            // Add the user's chosen role to the main object so it's easily accessible
+            mainObject.interactionUser.userChosenRole = userChosenRole;
 
-                const teamCompositionRow = new ActionRowBuilder().addComponents(selectComposition);
+            // Calculate the eligible composition based on the user's chosen role
+            const selectComposition = getEligibleComposition(mainObject);
 
-                const compositionResponse = await userRoleConfirmation.update({
-                    content: `Dungeon: ${dungeonToRun}\nDifficulty: +${dungeonDifficulty}\nTime/Completion: ${timeOrCompletion}\nYour role: ${userChosenRole}\nRequired roles:`,
-                    components: [teamCompositionRow, confirmCancelRow],
-                });
+            const teamCompositionRow = new ActionRowBuilder().addComponents(selectComposition);
 
-                // Temporary storage for dropdown values
-                let dungeonCompositionList = null;
+            const compositionResponse = await userRoleConfirmation.update({
+                content: `Dungeon: ${dungeonToRun}\nDifficulty: +${dungeonDifficulty}\nTime/Completion: ${timeOrCompletion}\nYour role: ${userChosenRole}\nRequired roles:`,
+                components: [teamCompositionRow, confirmCancelRow],
+            });
 
-                // Create a collector for both dropdown and button interactions
-                const confirmCollector = compositionResponse.createMessageComponentCollector({
-                    filter: userFilter,
-                    time: timeout,
-                });
+            // Temporary storage for dropdown values
+            let dungeonCompositionList = null;
 
-                confirmCollector.on("collect", async (i) => {
-                    if (i.isStringSelectMenu()) {
-                        dungeonCompositionList = i.values;
+            // Create a collector for both dropdown and button interactions
+            const confirmCollector = compositionResponse.createMessageComponentCollector({
+                filter: userFilter,
+                time: timeout,
+            });
 
-                        // This is required if user selects the wrong roles and wants to change them
+            confirmCollector.on("collect", async (i) => {
+                if (i.isStringSelectMenu()) {
+                    dungeonCompositionList = i.values;
+
+                    // This is required if user selects the wrong roles and wants to change them
+                    await i.deferUpdate();
+                } else if (i.customId === "confirm") {
+                    // Inform the user if they didn't select any roles
+                    if (!dungeonCompositionList) {
+                        // If the user didn't select any roles display a warning message
+                        await compositionResponse.edit({
+                            content: `Dungeon: ${dungeonToRun}\nDifficulty: +${dungeonDifficulty}\nTime/Completion: ${timeOrCompletion}\nYour role: ${userChosenRole}\nRequired roles:\n**Please select at least one role!**`,
+                            components: [teamCompositionRow, confirmCancelRow],
+                        });
+
                         await i.deferUpdate();
-                    } else if (i.customId === "confirm") {
-                        // Inform the user if they didn't select any roles
-                        if (!dungeonCompositionList) {
-                            // If the user didn't select any roles display a warning message
-                            await compositionResponse.edit({
-                                content: `Dungeon: ${dungeonToRun}\nDifficulty: +${dungeonDifficulty}\nTime/Completion: ${timeOrCompletion}\nYour role: ${userChosenRole}\nRequired roles:\n**Please select at least one role!**`,
-                                components: [teamCompositionRow, confirmCancelRow],
-                            });
+                    } else {
+                        // Add the user to the main object
+                        mainObject.roles[userChosenRole].spots.push(mainObject.interactionUser.userId);
+                        mainObject.roles[userChosenRole].nicknames.push(mainObject.interactionUser.nickname + " 🚩");
 
-                            await i.deferUpdate();
-                        } else {
-                            // Add the user to the main object
-                            mainObject.roles[userChosenRole].spots.push(mainObject.interactionUser.userId);
-                            mainObject.roles[userChosenRole].nicknames.push(
-                                mainObject.interactionUser.nickname + " 🚩"
-                            );
+                        // Pull the filled spot from the main object
+                        const filledSpot = mainObject.embedData.filledSpot;
 
-                            // Pull the filled spot from the main object
-                            const filledSpot = mainObject.embedData.filledSpot;
-
-                            for (const role in mainObject.roles) {
-                                if (!dungeonCompositionList.includes(role)) {
-                                    // Add filled members to the spots, except for the user's chosen role
-                                    if (role !== userChosenRole) {
-                                        if (isDPSRole(role)) {
-                                            if (mainObject.roles["DPS"].spots.length < 3) {
-                                                mainObject.roles["DPS"].spots.push(filledSpot);
-                                                mainObject.roles["DPS"].nicknames.push(filledSpot);
-                                            }
-                                        } else {
-                                            mainObject.roles[role].spots.push(filledSpot);
-                                            mainObject.roles[role].nicknames.push(filledSpot);
+                        for (const role in mainObject.roles) {
+                            if (!dungeonCompositionList.includes(role)) {
+                                // Add filled members to the spots, except for the user's chosen role
+                                if (role !== userChosenRole) {
+                                    if (isDPSRole(role)) {
+                                        if (mainObject.roles["DPS"].spots.length < 3) {
+                                            mainObject.roles["DPS"].spots.push(filledSpot);
+                                            mainObject.roles["DPS"].nicknames.push(filledSpot);
                                         }
-                                    }
-
-                                    if (isDPSRole(role) & (mainObject.roles["DPS"].spots.length >= 3)) {
-                                        mainObject.roles["DPS"].disabled = true;
-                                    } else if (!isDPSRole(role)) {
-                                        mainObject.roles[role].disabled = true;
+                                    } else {
+                                        mainObject.roles[role].spots.push(filledSpot);
+                                        mainObject.roles[role].nicknames.push(filledSpot);
                                     }
                                 }
-                            }
 
-                            const updatedDungeonCompositionList = dungeonCompositionList.map((role) => {
-                                return role.startsWith("DPS") ? "DPS" : role;
-                            });
-
-                            if (i.customId === "confirm") {
-                                await sendEmbed(mainObject, currentChannel, updatedDungeonCompositionList);
-
-                                await i.reply({
-                                    content: `The passphrase for the dungeon is: \`${mainObject.utils.passphrase.phrase}\`\nLook out for NoP members applying with this in-game!`,
-                                    ephemeral: true,
-                                });
-
-                                // Delete the interaction confirmation messages due to the ephemeral flag
-                                await interaction.deleteReply();
-
-                                // Send the created dungeon status to the database
-                                await interactionStatusTable.create({
-                                    interaction_id: interaction.id,
-                                    interaction_user: interaction.user.id,
-                                    interaction_status: "created",
-                                });
-
-                                confirmCollector.stop("confirmCreation");
+                                if (isDPSRole(role) & (mainObject.roles["DPS"].spots.length >= 3)) {
+                                    mainObject.roles["DPS"].disabled = true;
+                                } else if (!isDPSRole(role)) {
+                                    mainObject.roles[role].disabled = true;
+                                }
                             }
                         }
-                    } else if (i.customId === "cancel") {
-                        confirmCollector.stop("cancelled");
+
+                        const updatedDungeonCompositionList = dungeonCompositionList.map((role) => {
+                            return role.startsWith("DPS") ? "DPS" : role;
+                        });
+
+                        if (i.customId === "confirm") {
+                            await i.update({
+                                content: `The passphrase for the dungeon is: \`${mainObject.utils.passphrase.phrase}\`\nLook out for NoP members applying with this in-game!`,
+                                ephemeral: true,
+                                components: [],
+                            });
+
+                            await sendEmbed(mainObject, currentChannel, updatedDungeonCompositionList);
+
+                            // Send the created dungeon status to the database
+                            await interactionStatusTable.create({
+                                interaction_id: interaction.id,
+                                interaction_user: interaction.user.id,
+                                interaction_status: "created",
+                                command_used: "lfg",
+                            });
+
+                            confirmCollector.stop("confirmCreation");
+                        }
                     }
-                });
+                } else if (i.customId === "cancel") {
+                    confirmCollector.stop("cancelled");
+                }
+            });
 
-                confirmCollector.on("end", async (collected, reason) => {
-                    if (reason === "time") {
-                        await compositionResponse.edit({
-                            content: "LFG timed out! Please use /lfg again to create a new group.",
-                            components: [],
-                        });
+            confirmCollector.on("end", async (collected, reason) => {
+                if (reason === "time") {
+                    await compositionResponse.edit({
+                        content: "LFG timed out! Please use /lfg again to create a new group.",
+                        components: [],
+                    });
 
-                        interactionStatusTable.create({
-                            interaction_id: interaction.id,
-                            interaction_user: interaction.user.id,
-                            interaction_status: "timeoutBeforeCreation",
-                        });
-                    } else if (reason === "cancelled") {
-                        await createStatusEmbed("LFG cancelled by the user.", compositionResponse);
+                    interactionStatusTable.create({
+                        interaction_id: interaction.id,
+                        interaction_user: interaction.user.id,
+                        interaction_status: "timeoutBeforeCreation",
+                    });
+                } else if (reason === "cancelled") {
+                    await createStatusEmbed("LFG cancelled by the user.", compositionResponse);
 
-                        interactionStatusTable.create({
-                            interaction_id: interaction.id,
-                            interaction_user: interaction.user.id,
-                            interaction_status: "cancelled",
-                        });
-                    }
-                });
-            } catch (e) {
-                processError(e, interaction);
-            }
+                    interactionStatusTable.create({
+                        interaction_id: interaction.id,
+                        interaction_user: interaction.user.id,
+                        interaction_status: "cancelled",
+                    });
+                }
+            });
+        } catch (e) {
+            processError(e, interaction);
         }
-        runCommandLogic();
     },
 };

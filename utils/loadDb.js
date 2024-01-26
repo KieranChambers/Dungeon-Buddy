@@ -98,6 +98,10 @@ const interactionStatusTable = sequelize.define("interaction_status", {
         type: Sequelize.STRING,
         allowNull: false,
     },
+    command_used: {
+        type: Sequelize.STRING,
+        allowNull: false,
+    },
 });
 
 function syncTables() {

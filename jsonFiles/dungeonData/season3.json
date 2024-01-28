@@ -49,7 +49,7 @@
             "limit": "33:00",
             "+2": "26.24",
             "+3": "19.48",
-            "acronym": "BLOOM",
+            "acronym": "EB",
             "wowheadStrategyUrl": "https://www.wowhead.com/guide/mythic-plus-dungeons/everbloom-strategy",
             "bannerImageUrl": "https://github.com/KieranChambers/Dungeon-Buddy/blob/master/dungeonImages/The%20Everbloom.png?raw=true",
             "dungeonThumbnailUrl": "https://wow.zamimg.com/images/wow/journal/ui-ej-boss-yalnu.png"
@@ -58,7 +58,7 @@
             "limit": "34:00",
             "+2": "27:12",
             "+3": "20:24",
-            "acronym": "TOT",
+            "acronym": "TOTT",
             "wowheadStrategyUrl": "https://www.wowhead.com/guide/mythic-plus-dungeons/throne-of-the-tides-strategy",
             "bannerImageUrl": "https://github.com/KieranChambers/Dungeon-Buddy/blob/master/dungeonImages/Throne%20of%20the%20Tides.png?raw=true",
             "dungeonThumbnailUrl": "https://wow.zamimg.com/images/wow/journal/ui-ej-boss-ozumat.png"

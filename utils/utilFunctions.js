@@ -134,7 +134,7 @@ function addUserToRole(userId, userNickname, mainObject, newRole) {
 }
 
 async function invalidDungeonString(interaction, reason) {
-    const breakdownString = `\n\nExample string: \`fall 15t d hdd\`\n\`fall\` - Short form dungeon name\n\`15t\` - dungeon level + time or completion\n\`d\` - your role\n\`hdd\` - Required roles\n\nShort form Dungeon Names (not case-sensitive)\nAD - Atal'Dazar\nBRH - Black Rook Hold\nDHT - Darkheart Thicket\nFALL - DOTI: Galakrond's Fall\nRISE - DOTI: Murozond's Rise\nBLOOM- The Everbloom\nTOT - Throne of the Tides\nWM - Waycrest Manner\n\n`;
+    const breakdownString = `\n\nExample string: \`fall 15t d hdd\`\n\`fall\` - Short form dungeon name\n\`15t\` - dungeon level + time or completion\n\`d\` - your role\n\`hdd\` - Required roles\n\nShort form Dungeon Names (not case-sensitive)\nAD - Atal'Dazar\nBRH - Black Rook Hold\nDHT - Darkheart Thicket\nFALL - DOTI: Galakrond's Fall\nRISE - DOTI: Murozond's Rise\nEB - The Everbloom\nTOTT - Throne of the Tides\nWM - Waycrest Manner\n\n`;
     const invalidDungeonString = `Please enter a valid quick string.`;
     if (!reason) {
         reason = invalidDungeonString + breakdownString;

@@ -75,7 +75,7 @@ function parseRolesToTag(difficulty, requiredComposition, guildId) {
 
 async function sendPassphraseToUser(interaction, mainObject) {
     await interaction.followUp({
-        content: `The passphrase for the dungeon is: \`${mainObject.utils.passphrase.phrase}\`\nAdd this to your note when applying to the group in-game!`,
+        content: `The passphrase for the dungeon is: \`${mainObject.utils.passphrase.phrase}\`\nAdd this to your note when applying to \`${mainObject.embedData.listedAs}\` in-game!`,
         ephemeral: true,
     });
 }
@@ -133,6 +133,22 @@ function addUserToRole(userId, userNickname, mainObject, newRole) {
     }
 }
 
+async function invalidDungeonString(interaction, reason) {
+    const breakdownString = `\n\nExample string: \`fall 15t d hdd\`\n\`fall\` - Short form dungeon name\n\`15t\` - dungeon level + time or completion\n\`d\` - your role\n\`hdd\` - Required roles\n\nShort form Dungeon Names (not case-sensitive)\nAD - Atal'Dazar\nBRH - Black Rook Hold\nDHT - Darkheart Thicket\nFALL - DOTI: Galakrond's Fall\nRISE - DOTI: Murozond's Rise\nEB - The Everbloom\nTOTT - Throne of the Tides\nWM - Waycrest Manner\n\n`;
+    const invalidDungeonString = `Please enter a valid quick string.`;
+    if (!reason) {
+        reason = invalidDungeonString + breakdownString;
+    } else {
+        reason = reason + breakdownString;
+    }
+
+    await interaction.reply({
+        content: `${reason}`,
+        ephemeral: true,
+    });
+    return;
+}
+
 module.exports = {
     generateRoleIcons,
     generateListedAsString,
@@ -143,4 +159,5 @@ module.exports = {
     addUserToRole,
     sendPassphraseToUser,
     removeUserFromRole,
+    invalidDungeonString,
 };

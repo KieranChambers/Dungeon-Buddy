@@ -20,6 +20,13 @@ module.exports = {
         .setDescription("Post a message to find a group for your key.")
         .addStringOption((option) =>
             option
+                .setName("dungeon")
+                .setDescription("Select a dungeon to run.")
+                .setRequired(true)
+                .addChoices(...dungeonList.map((dungeon) => ({ name: dungeon, value: dungeon })))
+        )
+        .addStringOption((option) =>
+            option
                 .setName("listed_as")
                 .setDescription("Specify a listed as name for your dungeon. Otherwise one will be generated for you.")
                 .setRequired(false)
@@ -33,7 +40,10 @@ module.exports = {
     async execute(interaction) {
         const mainObject = getMainObject(interaction);
 
-        // Set the listed as name if the user specified one
+        const dungeonToRun = interaction.options.getString("dungeon");
+        mainObject.embedData.dungeonName = dungeonToRun;
+
+        // Set the listed as group name/creator notes if the user specified one
         const listedAs = interaction.options.getString("listed_as");
         if (listedAs) {
             mainObject.embedData.listedAs = listedAs;
@@ -44,16 +54,7 @@ module.exports = {
         }
 
         // Timeout for the interaction collector
-        const timeout = 60_000;
-
-        const selectDungeon = new StringSelectMenuBuilder()
-            .setCustomId("dungeons")
-            .setPlaceholder("Select a dungeon")
-            .setMinValues(1)
-            .setMaxValues(1)
-            .addOptions(
-                dungeonList.map((dungeon) => new StringSelectMenuOptionBuilder().setLabel(dungeon).setValue(dungeon))
-            );
+        const timeout = 90_000;
 
         // Parse key levels from the channel name
         const currentChannel = interaction.channel;
@@ -69,151 +70,223 @@ module.exports = {
             dungeonDifficultyRanges.push(i);
         }
 
-        const selectDifficulty = new StringSelectMenuBuilder()
-            .setCustomId("difficulty")
-            .setPlaceholder("Select a difficulty")
-            .setMinValues(1)
-            .setMaxValues(1)
-            .addOptions(
-                dungeonDifficultyRanges.map((range) =>
-                    new StringSelectMenuOptionBuilder().setLabel(`+${range}`).setValue(`${range}`)
-                )
+        function getSelectDifficultyRow(difficultyPlaceholder) {
+            const getSelectDifficulty = new StringSelectMenuBuilder()
+                .setCustomId("difficulty")
+                .setPlaceholder(difficultyPlaceholder)
+                .setMinValues(1)
+                .setMaxValues(1)
+                .addOptions(
+                    dungeonDifficultyRanges.map((range) =>
+                        new StringSelectMenuOptionBuilder().setLabel(`+${range}`).setValue(`${range}`)
+                    )
+                );
+
+            const difficultyRow = new ActionRowBuilder().addComponents(getSelectDifficulty);
+            return difficultyRow;
+        }
+
+        function getTimeCompletionRow(timeCompletionPlaceholder) {
+            const getTimeCompletion = new StringSelectMenuBuilder()
+                .setCustomId("timeCompletion")
+                .setPlaceholder(timeCompletionPlaceholder)
+                .setMinValues(1)
+                .setMaxValues(1)
+                .addOptions(
+                    new StringSelectMenuOptionBuilder().setLabel("Time").setValue("Time"),
+                    new StringSelectMenuOptionBuilder().setLabel("Completion").setValue("Completion")
+                );
+
+            const timeCompletionRow = new ActionRowBuilder().addComponents(getTimeCompletion);
+            return timeCompletionRow;
+        }
+
+        function getSelectUserRoleRow(userRolePlaceholder) {
+            const getSelectUserRow = new StringSelectMenuBuilder()
+                .setCustomId("userRole")
+                .setPlaceholder(userRolePlaceholder)
+                .setMinValues(1)
+                .setMaxValues(1)
+                .addOptions(
+                    new StringSelectMenuOptionBuilder()
+                        .setLabel("Tank")
+                        .setValue("Tank")
+                        .setEmoji(mainObject.roles.Tank.emoji),
+                    new StringSelectMenuOptionBuilder()
+                        .setLabel("Healer")
+                        .setValue("Healer")
+                        .setEmoji(mainObject.roles.Healer.emoji),
+                    new StringSelectMenuOptionBuilder()
+                        .setLabel("DPS")
+                        .setValue("DPS")
+                        .setEmoji(mainObject.roles.DPS.emoji)
+                );
+
+            const userRoleRow = new ActionRowBuilder().addComponents(getSelectUserRow);
+            return userRoleRow;
+        }
+
+        function getEligibleCompositionRow() {
+            const eligibleComposition = getEligibleComposition(mainObject);
+
+            const eligibleCompositionRow = new ActionRowBuilder().addComponents(eligibleComposition);
+            return eligibleCompositionRow;
+        }
+
+        function getConfirmCancelRow() {
+            const confirmSuccess = new ButtonBuilder().setLabel("Create Group").setCustomId("confirm").setStyle(3);
+            const confirmCancel = new ButtonBuilder().setLabel("Cancel").setCustomId("cancel").setStyle(4);
+
+            const confirmCancelRow = new ActionRowBuilder().addComponents(confirmSuccess, confirmCancel);
+            return confirmCancelRow;
+        }
+
+        function getRows(
+            difficultyPlaceholder,
+            timeCompletionPlaceholder,
+            selectUserPlaceholder,
+            teamCompositionPlaceholder
+        ) {
+            const difficultyRow = getSelectDifficultyRow(difficultyPlaceholder);
+            const timeCompletionRow = getTimeCompletionRow(timeCompletionPlaceholder);
+            const userRoleRow = getSelectUserRoleRow(selectUserPlaceholder);
+            const eligibleCompositionRow = getEligibleCompositionRow(teamCompositionPlaceholder);
+            const confirmCancelRow = getConfirmCancelRow();
+
+            return [difficultyRow, timeCompletionRow, userRoleRow, eligibleCompositionRow, confirmCancelRow];
+        }
+
+        // Temporary storage for dropdown values
+        let dungeonDifficultyPlaceholder = "Select a difficulty";
+        let timeOrCompletionPlaceholder = "Time/Completion?";
+        let userChosenRolePlaceholder = "Select your role";
+        let dungeonCompositionPlaceholder = "Select your composition";
+
+        async function updateRows(
+            i,
+            msgContent,
+            dungeonDifficulty,
+            timeOrCompletion,
+            userChosenRole,
+            dungeonComposition
+        ) {
+            const [difficultyRow, timeCompletionRow, userRoleRow, eligibleCompositionRow, confirmCancelRow] = getRows(
+                dungeonDifficulty || dungeonDifficultyPlaceholder,
+                timeOrCompletion || timeOrCompletionPlaceholder,
+                userChosenRole || userChosenRolePlaceholder,
+                dungeonComposition || dungeonCompositionPlaceholder
             );
 
-        const selectTimeCompletion = new StringSelectMenuBuilder()
-            .setCustomId("timeCompletion")
-            .setPlaceholder("Time/Completion?")
-            .setMinValues(1)
-            .setMaxValues(1)
-            .addOptions(
-                new StringSelectMenuOptionBuilder().setLabel("Time").setValue("Time"),
-                new StringSelectMenuOptionBuilder().setLabel("Completion").setValue("Completion")
-            );
-
-        const selectUserRole = new StringSelectMenuBuilder()
-            .setCustomId("userRole")
-            .setPlaceholder("Select your role")
-            .setMinValues(1)
-            .setMaxValues(1)
-            .addOptions(
-                new StringSelectMenuOptionBuilder()
-                    .setLabel("Tank")
-                    .setValue("Tank")
-                    .setEmoji(mainObject.roles.Tank.emoji),
-                new StringSelectMenuOptionBuilder()
-                    .setLabel("Healer")
-                    .setValue("Healer")
-                    .setEmoji(mainObject.roles.Healer.emoji),
-                new StringSelectMenuOptionBuilder().setLabel("DPS").setValue("DPS").setEmoji(mainObject.roles.DPS.emoji)
-            );
-
-        const confirmSuccess = new ButtonBuilder().setLabel("Create Group").setCustomId("confirm").setStyle(3);
-        const confirmCancel = new ButtonBuilder().setLabel("Cancel").setCustomId("cancel").setStyle(4);
-
-        const dungeonRow = new ActionRowBuilder().addComponents(selectDungeon);
-        const difficultyRow = new ActionRowBuilder().addComponents(selectDifficulty);
-        const timeCompletionRow = new ActionRowBuilder().addComponents(selectTimeCompletion);
-        const userRoleRow = new ActionRowBuilder().addComponents(selectUserRole);
-        const confirmCancelRow = new ActionRowBuilder().addComponents(confirmSuccess, confirmCancel);
+            await i.update({
+                content: msgContent,
+                ephemeral: true,
+                components: [difficultyRow, timeCompletionRow, userRoleRow, eligibleCompositionRow, confirmCancelRow],
+            });
+        }
 
         const userFilter = (i) => i.user.id === interaction.user.id;
 
+        // Pull the filled spot from the main object
+        const filledSpot = mainObject.embedData.filledSpot;
+
         try {
+            const [difficultyRow, timeCompletionRow, userRoleRow, eligibleCompositionRow, confirmCancelRow] = getRows(
+                dungeonDifficultyPlaceholder,
+                timeOrCompletionPlaceholder,
+                userChosenRolePlaceholder,
+                dungeonCompositionPlaceholder
+            );
+
+            let messageContent = `You are creating a group for ${dungeonToRun}.`;
             const dungeonResponse = await interaction.reply({
+                content: messageContent,
                 ephemeral: true,
-                components: [dungeonRow],
+                components: [difficultyRow, timeCompletionRow, userRoleRow, eligibleCompositionRow, confirmCancelRow],
             });
 
-            const dungeonConfirmation = await dungeonResponse.awaitMessageComponent({
-                filter: userFilter,
-                time: timeout,
-            });
-
-            const dungeonToRun = dungeonConfirmation.values[0];
-            mainObject.embedData.dungeonName = dungeonToRun;
-
-            const difficultyResponse = await dungeonConfirmation.update({
-                content: `Dungeon: ${dungeonToRun}.`,
-                components: [difficultyRow],
-            });
-
-            const difficultyConfirmation = await difficultyResponse.awaitMessageComponent({
-                filter: userFilter,
-                time: timeout,
-            });
-
-            const dungeonDifficulty = difficultyConfirmation.values[0];
-            mainObject.embedData.dungeonDifficulty = `+${dungeonDifficulty}`;
-
-            const timeCompletionResponse = await difficultyConfirmation.update({
-                content: `Dungeon: ${dungeonToRun}\nDifficulty: +${dungeonDifficulty}`,
-                components: [timeCompletionRow],
-            });
-
-            const timeCompletionConfirmation = await timeCompletionResponse.awaitMessageComponent({
-                filter: userFilter,
-                time: timeout,
-            });
-
-            const timeOrCompletion = timeCompletionConfirmation.values[0];
-            mainObject.embedData.timeOrCompletion = timeOrCompletion;
-
-            const userRoleResponse = await timeCompletionConfirmation.update({
-                content: `Dungeon: ${dungeonToRun}\nDifficulty: +${dungeonDifficulty}\nTime/Completion: ${timeOrCompletion}`,
-                components: [userRoleRow],
-            });
-
-            const userRoleConfirmation = await userRoleResponse.awaitMessageComponent({
-                filter: userFilter,
-                time: timeout,
-            });
-
-            const userChosenRole = userRoleConfirmation.values[0];
-            // Add the user's chosen role to the main object so it's easily accessible
-            mainObject.interactionUser.userChosenRole = userChosenRole;
-
-            // Calculate the eligible composition based on the user's chosen role
-            const selectComposition = getEligibleComposition(mainObject);
-
-            const teamCompositionRow = new ActionRowBuilder().addComponents(selectComposition);
-
-            const compositionResponse = await userRoleConfirmation.update({
-                content: `Dungeon: ${dungeonToRun}\nDifficulty: +${dungeonDifficulty}\nTime/Completion: ${timeOrCompletion}\nYour role: ${userChosenRole}\nRequired roles:`,
-                components: [teamCompositionRow, confirmCancelRow],
-            });
-
-            // Temporary storage for dropdown values
+            // Temporary storage for dungeon/group values
+            let dungeonDifficulty = null;
+            let timeOrCompletion = null;
+            let userChosenRole = null;
+            let dungeonComposition = null;
             let dungeonCompositionList = null;
 
-            // Create a collector for both dropdown and button interactions
-            const confirmCollector = compositionResponse.createMessageComponentCollector({
+            // Create a collector for both the drop-down menu and button interactions
+            const dungeonCollector = dungeonResponse.createMessageComponentCollector({
                 filter: userFilter,
                 time: timeout,
             });
 
-            confirmCollector.on("collect", async (i) => {
-                if (i.isStringSelectMenu()) {
-                    dungeonCompositionList = i.values;
+            dungeonCollector.on("collect", async (i) => {
+                if (i.customId === "difficulty") {
+                    dungeonDifficulty = `+${i.values[0]}`;
+                    mainObject.embedData.dungeonDifficulty = dungeonDifficulty;
 
-                    // This is required if user selects the wrong roles and wants to change them
                     await i.deferUpdate();
-                } else if (i.customId === "confirm") {
-                    // Inform the user if they didn't select any roles
-                    if (!dungeonCompositionList) {
-                        // If the user didn't select any roles display a warning message
-                        await compositionResponse.edit({
-                            content: `Dungeon: ${dungeonToRun}\nDifficulty: +${dungeonDifficulty}\nTime/Completion: ${timeOrCompletion}\nYour role: ${userChosenRole}\nRequired roles:\n**Please select at least one role!**`,
-                            components: [teamCompositionRow, confirmCancelRow],
-                        });
+                } else if (i.customId === "timeCompletion") {
+                    timeOrCompletion = i.values[0];
+                    mainObject.embedData.timeOrCompletion = timeOrCompletion;
 
-                        await i.deferUpdate();
+                    await i.deferUpdate();
+                } else if (i.customId === "userRole") {
+                    // Need to reset the composition list if the user changes their role to avoid
+                    // the incorrect composition being sent to the embed
+                    if (userChosenRole !== i.values[0]) {
+                        dungeonCompositionList = null;
+                        dungeonComposition = null;
+                    }
+
+                    // Add the user's chosen role to the main object so it's easily accessible
+                    userChosenRole = i.values[0];
+                    mainObject.interactionUser.userChosenRole = userChosenRole;
+
+                    // Update the required composition drop-down based on the user's chosen role
+                    await updateRows(
+                        i,
+                        messageContent,
+                        dungeonDifficulty,
+                        timeOrCompletion,
+                        userChosenRole,
+                        dungeonComposition
+                    );
+                } else if (i.customId === "composition") {
+                    await i.deferUpdate();
+
+                    // Return if the user tries to create a group without selecting their own role
+                    if (i.values[0] === "none") {
+                        return;
+                    }
+                    dungeonCompositionList = i.values;
+                    dungeonComposition = dungeonCompositionList.join(", ");
+                }
+                // This is required if user selects the wrong options
+                else if (i.customId === "confirm") {
+                    // Notify the user if they haven't selected all the required options
+                    // With a unique message for each missing option in order of priority
+                    let messageContentMissing = messageContent;
+                    if (!dungeonDifficulty) {
+                        messageContentMissing += "\n**Please select a difficulty.**";
+                    } else if (!timeOrCompletion) {
+                        messageContentMissing += "\n**Please select time/completion.**";
+                    } else if (!userChosenRole) {
+                        messageContentMissing += "\n**Please select your role.**";
+                    } else if (!dungeonComposition) {
+                        messageContentMissing += "\n**Please select required roles.**";
+                    }
+
+                    if (!dungeonDifficulty || !timeOrCompletion || !userChosenRole || !dungeonComposition) {
+                        await updateRows(
+                            i,
+                            messageContentMissing,
+                            dungeonDifficulty,
+                            timeOrCompletion,
+                            userChosenRole,
+                            dungeonComposition
+                        );
                     } else {
                         // Add the user to the main object
                         mainObject.roles[userChosenRole].spots.push(mainObject.interactionUser.userId);
                         mainObject.roles[userChosenRole].nicknames.push(mainObject.interactionUser.nickname + " 🚩");
-
-                        // Pull the filled spot from the main object
-                        const filledSpot = mainObject.embedData.filledSpot;
 
                         for (const role in mainObject.roles) {
                             if (!dungeonCompositionList.includes(role)) {
@@ -242,34 +315,32 @@ module.exports = {
                             return role.startsWith("DPS") ? "DPS" : role;
                         });
 
-                        if (i.customId === "confirm") {
-                            await i.update({
-                                content: `The passphrase for the dungeon is: \`${mainObject.utils.passphrase.phrase}\`\nLook out for NoP members applying with this in-game!`,
-                                ephemeral: true,
-                                components: [],
-                            });
+                        await i.update({
+                            content: `The passphrase for the dungeon is: \`${mainObject.utils.passphrase.phrase}\`\nLook out for NoP members applying with this in-game!`,
+                            ephemeral: true,
+                            components: [],
+                        });
 
-                            await sendEmbed(mainObject, currentChannel, updatedDungeonCompositionList);
+                        await sendEmbed(mainObject, currentChannel, updatedDungeonCompositionList);
 
-                            // Send the created dungeon status to the database
-                            await interactionStatusTable.create({
-                                interaction_id: interaction.id,
-                                interaction_user: interaction.user.id,
-                                interaction_status: "created",
-                                command_used: "lfg",
-                            });
+                        // Send the created dungeon status to the database
+                        await interactionStatusTable.create({
+                            interaction_id: interaction.id,
+                            interaction_user: interaction.user.id,
+                            interaction_status: "created",
+                            command_used: "lfg",
+                        });
 
-                            confirmCollector.stop("confirmCreation");
-                        }
+                        dungeonCollector.stop("confirmCreation");
                     }
                 } else if (i.customId === "cancel") {
-                    confirmCollector.stop("cancelled");
+                    dungeonCollector.stop("cancelled");
                 }
             });
 
-            confirmCollector.on("end", async (collected, reason) => {
+            dungeonCollector.on("end", async (collected, reason) => {
                 if (reason === "time") {
-                    await compositionResponse.edit({
+                    await dungeonResponse.edit({
                         content: "LFG timed out! Please use /lfg again to create a new group.",
                         components: [],
                     });
@@ -281,7 +352,7 @@ module.exports = {
                         command_used: "lfg",
                     });
                 } else if (reason === "cancelled") {
-                    await createStatusEmbed("LFG cancelled by the user.", compositionResponse);
+                    await createStatusEmbed("LFG cancelled by the user.", dungeonResponse);
 
                     interactionStatusTable.create({
                         interaction_id: interaction.id,

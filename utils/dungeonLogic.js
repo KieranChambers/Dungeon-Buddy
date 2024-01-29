@@ -9,6 +9,14 @@ const { createButton } = require("./discordFunctions");
 const { generateRoleIcons, sendPassphraseToUser } = require("./utilFunctions");
 
 function getEligibleComposition(mainObject) {
+    if (!mainObject.interactionUser.userChosenRole) {
+        const selectComposition = new StringSelectMenuBuilder()
+            .setCustomId("composition")
+            .setPlaceholder("What roles are you looking for?")
+            .setMinValues(1)
+            .addOptions(new StringSelectMenuOptionBuilder().setLabel("Choose your role first!").setValue("none"));
+        return selectComposition;
+    }
     const selectComposition = new StringSelectMenuBuilder()
         .setCustomId("composition")
         .setPlaceholder("What roles are you looking for?")
@@ -108,7 +116,6 @@ function getDungeonObject(dungeon, difficulty, mainObject) {
     };
 
     if (roleIcons.length > 4) {
-        dungeonObject.title += " (FULL)";
         dungeonObject.status = "full";
     }
 

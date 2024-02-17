@@ -15,7 +15,7 @@ module.exports = {
 
         const embedFields = [
             {
-                name: `${dungeonUserStats.dungeonGroupsCreated.total} Groups Created`,
+                name: `${dungeonUserStats.dungeonGroupsCreated.total} Total Groups Created`,
                 value: `**${dungeonUserStats.dungeonGroupsCreated.today} x 24H\n${dungeonUserStats.dungeonGroupsCreated.weekly} x 7D\n${dungeonUserStats.dungeonGroupsCreated.monthly} x 30D**`,
             },
             {
@@ -91,7 +91,7 @@ module.exports = {
                         components: [getKeyLevelRow],
                     });
 
-                    i.deferUpdate();
+                    await i.deferUpdate();
                 }
             });
 

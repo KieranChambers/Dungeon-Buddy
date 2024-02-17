@@ -107,10 +107,18 @@ function userExistsInAnyRole(userId, mainObject) {
     return false;
 }
 
-function addUserToRole(userId, userNickname, mainObject, newRole) {
-    if (userId === mainObject.interactionUser.userId) {
-        mainObject.roles[newRole].spots.push(mainObject.embedData.filledSpot);
-        mainObject.roles[newRole].nicknames.push(mainObject.embedData.filledSpot);
+function addUserToRole(userId, userNickname, mainObject, newRole, typeOfCollector) {
+    if (userId === mainObject.interactionUser.userId && typeOfCollector === "groupUtilityCollector") {
+        const filledSpot = mainObject.embedData.filledSpot;
+        let filledSpotCounter = mainObject.embedData.filledSpotCounter;
+        const filledSpotCombined = `${filledSpot}${filledSpotCounter}`;
+
+        mainObject.roles[newRole].spots.push(filledSpotCombined);
+        mainObject.roles[newRole].nicknames.push(filledSpot);
+
+        filledSpotCounter++;
+        mainObject.embedData.filledSpotCounter = filledSpotCounter;
+
         updateButtonState(mainObject, newRole);
         return "interactionUser";
     } else {
@@ -146,7 +154,6 @@ async function invalidDungeonString(interaction, reason) {
         content: `${reason}`,
         ephemeral: true,
     });
-    return;
 }
 
 module.exports = {

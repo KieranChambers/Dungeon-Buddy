@@ -186,9 +186,6 @@ module.exports = {
 
         const userFilter = (i) => i.user.id === interaction.user.id;
 
-        // Pull the filled spot from the main object
-        const filledSpot = mainObject.embedData.filledSpot;
-
         try {
             const [difficultyRow, timeCompletionRow, userRoleRow, eligibleCompositionRow, confirmCancelRow] = getRows(
                 dungeonDifficultyPlaceholder,
@@ -288,17 +285,22 @@ module.exports = {
                         mainObject.roles[userChosenRole].spots.push(mainObject.interactionUser.userId);
                         mainObject.roles[userChosenRole].nicknames.push(mainObject.interactionUser.nickname + " 🚩");
 
+                        // Pull the filled spot from the main object
+                        const filledSpot = mainObject.embedData.filledSpot;
+                        let filledSpotCounter = 0;
+
                         for (const role in mainObject.roles) {
                             if (!dungeonCompositionList.includes(role)) {
+                                const filledSpotCombined = `${filledSpot}${filledSpotCounter}`;
                                 // Add filled members to the spots, except for the user's chosen role
                                 if (role !== userChosenRole) {
                                     if (isDPSRole(role)) {
                                         if (mainObject.roles["DPS"].spots.length < 3) {
-                                            mainObject.roles["DPS"].spots.push(filledSpot);
+                                            mainObject.roles["DPS"].spots.push(filledSpotCombined);
                                             mainObject.roles["DPS"].nicknames.push(filledSpot);
                                         }
                                     } else {
-                                        mainObject.roles[role].spots.push(filledSpot);
+                                        mainObject.roles[role].spots.push(filledSpotCombined);
                                         mainObject.roles[role].nicknames.push(filledSpot);
                                     }
                                 }
@@ -308,8 +310,12 @@ module.exports = {
                                 } else if (!isDPSRole(role)) {
                                     mainObject.roles[role].disabled = true;
                                 }
+                                filledSpotCounter++;
                             }
                         }
+
+                        // Update the filled spot counter in the main object
+                        mainObject.embedData.filledSpotCounter = filledSpotCounter;
 
                         const updatedDungeonCompositionList = dungeonCompositionList.map((role) => {
                             return role.startsWith("DPS") ? "DPS" : role;

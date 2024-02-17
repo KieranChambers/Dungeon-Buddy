@@ -7,7 +7,7 @@ const {
     removeUserFromRole,
 } = require("./utilFunctions");
 const { dungeonInstanceTable, interactionStatusTable } = require("./loadDb");
-const { processDungeonEmbed, getDungeonObject, getDungeonButtonRow, cancelGroup } = require("./dungeonLogic");
+const { processDungeonEmbed, getDungeonObject, getDungeonButtonRow, changeGroup } = require("./dungeonLogic");
 const { processSendEmbedError, createStatusEmbed } = require("./errorHandling");
 const { dungeonData } = require("./loadJson.js");
 
@@ -17,6 +17,8 @@ async function sendEmbed(mainObject, channel, requiredCompositionList) {
 
     // Get the roles to tag
     const rolesToTag = parseRolesToTag(dungeonDifficulty, requiredCompositionList, channel.guild.id);
+
+    mainObject.embedData.rolesToTag = rolesToTag;
 
     // Generate a listed as string for the mainObject if the user hasn't specified one
     if (!mainObject.embedData.listedAs) {
@@ -46,12 +48,12 @@ async function sendEmbed(mainObject, channel, requiredCompositionList) {
 
         if (i.customId === "Tank") {
             if (mainObject.roles.Tank.inProgress) {
-                i.deferUpdate();
+                await i.deferUpdate();
                 return;
             }
             mainObject.roles.Tank.inProgress = true;
 
-            const callUser = addUserToRole(discordUserId, discordNickname, mainObject, "Tank");
+            const callUser = addUserToRole(discordUserId, discordNickname, mainObject, "Tank", "groupUtilityCollector");
             await processDungeonEmbed(
                 i,
                 rolesToTag,
@@ -65,12 +67,18 @@ async function sendEmbed(mainObject, channel, requiredCompositionList) {
             mainObject.roles.Tank.inProgress = false;
         } else if (i.customId === "Healer") {
             if (mainObject.roles.Healer.inProgress) {
-                i.deferUpdate();
+                await i.deferUpdate();
                 return;
             }
             mainObject.roles.Healer.inProgress = true;
 
-            const callUser = addUserToRole(discordUserId, discordNickname, mainObject, "Healer");
+            const callUser = addUserToRole(
+                discordUserId,
+                discordNickname,
+                mainObject,
+                "Healer",
+                "groupUtilityCollector"
+            );
             await processDungeonEmbed(
                 i,
                 rolesToTag,
@@ -84,15 +92,15 @@ async function sendEmbed(mainObject, channel, requiredCompositionList) {
             mainObject.roles.Healer.inProgress = false;
         } else if (i.customId === "DPS") {
             if (mainObject.roles.DPS.inProgress) {
-                i.deferUpdate();
+                await i.deferUpdate();
                 return;
             }
             mainObject.roles.DPS.inProgress = true;
 
-            const callUser = addUserToRole(discordUserId, discordNickname, mainObject, "DPS");
+            const callUser = addUserToRole(discordUserId, discordNickname, mainObject, "DPS", "groupUtilityCollector");
             if (callUser === "sameRole") {
-                i.deferUpdate();
                 mainObject.roles.DPS.inProgress = false;
+                await i.deferUpdate();
                 return;
             }
 
@@ -110,10 +118,8 @@ async function sendEmbed(mainObject, channel, requiredCompositionList) {
         } else if (i.customId === "getPassphrase") {
             // Confirm the user is in the group
             if (!userExistsInAnyRole(discordUserId, mainObject)) {
-                await i.reply({
-                    content: "Only group members can request the passphrase!",
-                    ephemeral: true,
-                });
+                await i.deferUpdate();
+                return;
             } else {
                 let contentMessage;
                 if (discordUserId === interactionUserId) {
@@ -127,20 +133,19 @@ async function sendEmbed(mainObject, channel, requiredCompositionList) {
                 });
             }
         } else if (i.customId === "cancelGroup") {
-            // The group creator can cancel the group
             if (!userExistsInAnyRole(discordUserId, mainObject)) {
-                await i.reply({
-                    content: "Only group members can use this!",
-                    ephemeral: true,
-                });
+                await i.deferUpdate();
+                return;
             } else {
                 if (discordUserId === interactionUserId) {
                     await i.deferUpdate();
-                    await cancelGroup(i, groupUtilityCollector);
+
+                    // The group creator has advanced options
+                    await changeGroup(i, groupUtilityCollector, mainObject);
                 } else {
                     const [roleName, roleData] = userExistsInAnyRole(discordUserId, mainObject);
                     removeUserFromRole(discordUserId, discordNickname, mainObject, roleName, roleData);
-                    await processDungeonEmbed(
+                    groupStatus = await processDungeonEmbed(
                         i,
                         rolesToTag,
                         dungeonName,

@@ -138,9 +138,6 @@ module.exports = {
                 }
             }
 
-            // Pull the filled spot from the main object
-            const filledSpot = mainObject.embedData.filledSpot;
-
             const standardComposition = ["Tank", "Healer", "DPS", "DPS", "DPS"];
 
             const rolesMap = new Map();
@@ -161,9 +158,14 @@ module.exports = {
                 dungeonComposition.splice(index, 1);
             }
 
+            const filledSpot = mainObject.embedData.filledSpot;
+            let filledSpotCounter = 0;
+
             for (const role of dungeonComposition) {
+                const filledSpotCombined = `${filledSpot}${filledSpotCounter}`;
+
                 // Add filled members to the spots and nicknames arrays
-                mainObject.roles[role].spots.push(filledSpot);
+                mainObject.roles[role].spots.push(filledSpotCombined);
                 mainObject.roles[role].nicknames.push(filledSpot);
 
                 //  Disable the role buttons if the role is full
@@ -172,7 +174,11 @@ module.exports = {
                 } else if (role !== "DPS") {
                     mainObject.roles[role].disabled = true;
                 }
+                filledSpotCounter++;
             }
+
+            // Update the filled spot counter in the main object
+            mainObject.embedData.filledSpotCounter = filledSpotCounter;
 
             // Reply to the interaction first then send the embed which catches any errors
             await interaction.reply({

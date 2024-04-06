@@ -4,13 +4,15 @@ function loadJSON(path) {
     return JSON.parse(fs.readFileSync(path, "utf8"));
 }
 
-function getCurrentSeason() {
+function getCurrentExpSeason() {
     const config = loadJSON("./jsonFiles/config.json");
-    return config.currentSeason;
+    const currentExpansion = config.currentExpansion;
+    const currentSeason = config.currentSeason;
+    return [currentExpansion, currentSeason];
 }
 
-function getDungeonData(currentSeason) {
-    const dungeonData = loadJSON(`./jsonFiles/dungeonData/season${currentSeason}.json`)[currentSeason];
+function getDungeonData(currentExpansion, currentSeason) {
+    const dungeonData = loadJSON(`./jsonFiles/dungeonData/${currentExpansion}/season${currentSeason}.json`);
 
     const dungeonList = [];
     const acronymToNameMap = {};
@@ -23,8 +25,8 @@ function getDungeonData(currentSeason) {
     return { dungeonData, dungeonList, acronymToNameMap };
 }
 
-const currentSeason = getCurrentSeason();
-const { dungeonData, dungeonList, acronymToNameMap } = getDungeonData(currentSeason);
+const [currentExpansion, currentSeason] = getCurrentExpSeason();
+const { dungeonData, dungeonList, acronymToNameMap } = getDungeonData(currentExpansion, currentSeason);
 const wowWords = loadJSON("./jsonFiles/wowWords.json");
 
-module.exports = { dungeonData, dungeonList, acronymToNameMap, wowWords };
+module.exports = { dungeonData, dungeonList, acronymToNameMap, wowWords, currentExpansion, currentSeason };

@@ -2,6 +2,7 @@ const fs = require("fs");
 const path = require("path");
 const { Sequelize, Op } = require("sequelize");
 const { dungeonInstanceTable, sequelize } = require("./loadDb.js");
+const { currentExpansion, currentSeason } = require("./loadJson.js");
 
 const dungeonStatsObject = {
     dungeonGroupsCreated: {
@@ -15,15 +16,13 @@ const dungeonStatsObject = {
         key_levels_one: [],
         key_levels_two: [],
         key_levels_three: [],
-        key_levels_four: [],
     },
 };
 
 const key_levels = {
-    key_levels_one: ["+2", "+3", "+4", "+5", "+6", "+7", "+8", "+9", "+10"],
-    key_levels_two: ["+11", "+12", "+13", "+14", "+15"],
-    key_levels_three: ["+16", "+17", "+18", "+19", "+20"],
-    key_levels_four: ["+21", "+22", "+23", "+24", "+25", "+26", "+27", "+28", "+29", "+30"],
+    key_levels_one: ["+0"],
+    key_levels_two: ["+2", "+3", "+4", "+5"],
+    key_levels_three: ["+6", "+7", "+8", "9", "10"],
 };
 
 const popularKeysQuery = `
@@ -36,6 +35,8 @@ WITH popular_keys AS (
 	FROM
 		dungeoninstances
 	WHERE dungeon_difficulty in (:key_levels)
+    AND expansion = '${currentExpansion}'
+    AND season = '${currentSeason}'
 	GROUP BY
 		dungeon_name,
 		dungeon_difficulty
@@ -118,7 +119,10 @@ async function loadStats() {
     dungeonStatsObject.mostPopularDungeons = mostPopularDungeons;
 
     // Write dungeonStatsObject to a JSON file
-    const dungeonUserStatsPath = path.join(__dirname, "../jsonFiles/dungeonUserStats.json");
+    const dungeonUserStatsPath = path.join(
+        __dirname,
+        `../jsonFiles/dungeonUserStats/${currentExpansion}/season${currentSeason}.json`
+    );
     fs.writeFileSync(dungeonUserStatsPath, JSON.stringify(dungeonStatsObject));
 }
 

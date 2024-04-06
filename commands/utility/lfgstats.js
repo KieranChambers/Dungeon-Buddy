@@ -3,25 +3,29 @@ const path = require("path");
 const { SlashCommandBuilder } = require("@discordjs/builders");
 const { ActionRowBuilder, StringSelectMenuBuilder, StringSelectMenuOptionBuilder } = require("discord.js");
 const { processError } = require("../../utils/errorHandling.js");
+const { currentExpansion, currentSeason } = require("../../utils/loadJson.js");
 
 module.exports = {
     data: new SlashCommandBuilder()
         .setName("lfgstats")
         .setDescription("Check the overall dungeon stats recorded by the bot"),
     async execute(interaction) {
-        const dungeonUserStatsPath = path.join(__dirname, "../../jsonFiles/dungeonUserStats.json");
+        const dungeonUserStatsPath = path.join(
+            __dirname,
+            `../../jsonFiles/dungeonUserStats/${currentExpansion}/season${currentSeason}.json`
+        );
         const dungeonUserStatsData = await fs.readFile(dungeonUserStatsPath, "utf8");
         const dungeonUserStats = JSON.parse(dungeonUserStatsData);
 
         const embedFields = [
             {
                 name: `${dungeonUserStats.dungeonGroupsCreated.total} Total Groups Created`,
-                value: `**${dungeonUserStats.dungeonGroupsCreated.today} x 24H\n${dungeonUserStats.dungeonGroupsCreated.weekly} x 7D\n${dungeonUserStats.dungeonGroupsCreated.monthly} x 30D**`,
+                value: `**${dungeonUserStats.dungeonGroupsCreated.today} - 24H\n${dungeonUserStats.dungeonGroupsCreated.weekly} - 7D\n${dungeonUserStats.dungeonGroupsCreated.monthly} - 30D**`,
             },
             {
-                name: "Most Popular Dungeons",
+                name: `S${currentSeason} Most Popular Dungeons`,
                 value: `${dungeonUserStats.mostPopularDungeons
-                    .map((dungeon) => `**${dungeon.count} x ${dungeon.dungeon_name}**`)
+                    .map((dungeon) => `**${dungeon.count} - ${dungeon.dungeon_name}**`)
                     .join("\n")}`,
             },
         ];
@@ -38,10 +42,9 @@ module.exports = {
             .setMinValues(1)
             .setMaxValues(1)
             .addOptions(
-                new StringSelectMenuOptionBuilder().setLabel("M2-M10").setValue("key_levels_one"),
-                new StringSelectMenuOptionBuilder().setLabel("M11-M15").setValue("key_levels_two"),
-                new StringSelectMenuOptionBuilder().setLabel("M16-M20").setValue("key_levels_three"),
-                new StringSelectMenuOptionBuilder().setLabel("M21+").setValue("key_levels_four")
+                new StringSelectMenuOptionBuilder().setLabel("M0").setValue("key_levels_one"),
+                new StringSelectMenuOptionBuilder().setLabel("M2-M5").setValue("key_levels_two"),
+                new StringSelectMenuOptionBuilder().setLabel("M6-M10").setValue("key_levels_three")
             );
 
         const getKeyLevelRow = new ActionRowBuilder().addComponents(selectKeyLevelRow);
@@ -53,10 +56,9 @@ module.exports = {
         });
 
         const keyLevelTitleObject = {
-            key_levels_one: "M2-M10",
-            key_levels_two: "M11-M15",
-            key_levels_three: "M16-M20",
-            key_levels_four: "M21+",
+            key_levels_one: "M0",
+            key_levels_two: "M2-M5",
+            key_levels_three: "M6-M10",
         };
 
         const userFilter = (i) => i.user.id === interaction.user.id;
@@ -74,7 +76,7 @@ module.exports = {
 
                     const popularKeyFields = [
                         {
-                            name: `Most Popular Keys ${menuTitle}`,
+                            name: `S${currentSeason} Most Popular Keys ${menuTitle}`,
                             value: `\n\n${dungeonUserStats.mostPopularKeys[keyLevelValue]
                                 .map(
                                     (dungeon) =>

@@ -8,7 +8,7 @@ const sequelize = new Sequelize("database", "user", "password", {
 });
 
 // Define the structure for the DungeonInstance table
-const dungeonInstanceTable = sequelize.define("dungeoninstance", {
+const dungeonInstanceTable = sequelize.define("dungeoninstances", {
     dungeon_id: {
         type: Sequelize.INTEGER,
         primaryKey: true,
@@ -56,6 +56,14 @@ const dungeonInstanceTable = sequelize.define("dungeoninstance", {
     },
     dps3: {
         type: Sequelize.STRING,
+        allowNull: true,
+    },
+    expansion: {
+        type: Sequelize.STRING,
+        allowNull: true,
+    },
+    season: {
+        type: Sequelize.INTEGER,
         allowNull: true,
     },
 });

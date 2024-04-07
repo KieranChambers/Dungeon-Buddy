@@ -3,5 +3,5 @@ node_modules/
 oldCommands/
 TODO.md
 database*
-jsonFiles/dungeonUserStats/
+jsonFiles/dungeonUserStats/*/season*
 nodemon.json

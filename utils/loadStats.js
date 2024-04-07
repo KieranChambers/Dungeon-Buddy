@@ -20,7 +20,7 @@ const dungeonStatsObject = {
 };
 
 const key_levels = {
-    key_levels_one: ["+0"],
+    key_levels_one: ["M0"],
     key_levels_two: ["+2", "+3", "+4", "+5"],
     key_levels_three: ["+6", "+7", "+8", "9", "10"],
 };

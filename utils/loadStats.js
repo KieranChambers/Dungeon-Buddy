@@ -97,6 +97,10 @@ async function loadStats() {
     const mostPopularDungeons = await dungeonInstanceTable
         .findAll({
             attributes: ["dungeon_name", [sequelize.fn("count", sequelize.col("*")), "count"]],
+            where: {
+                expansion: currentExpansion,
+                season: currentSeason,
+            },
             group: ["dungeon_name"],
             order: [[sequelize.literal("count DESC")]],
         })

@@ -48,7 +48,7 @@ function parseRolesToTag(difficulty, requiredComposition, guildId) {
 
     let roleDifficultyString = "";
 
-    if (difficulty < 2) {
+    if (difficulty == "M0") {
         roleDifficultyString = "-M0";
     } else if (difficulty < 6) {
         roleDifficultyString = "-M2-5";
@@ -139,8 +139,9 @@ function addUserToRole(userId, userNickname, mainObject, newRole, typeOfCollecto
     }
 }
 
+// TODO: Pull the short forms in using the existing dungeon data JSON
 async function invalidDungeonString(interaction, reason) {
-    const breakdownString = `\n\nExample string: \`fall 15t d hdd\`\n\`fall\` - Short form dungeon name\n\`15t\` - dungeon level + time or completion\n\`d\` - your role\n\`hdd\` - Required roles\n\nShort form Dungeon Names (not case-sensitive)\nAD - Atal'Dazar\nBRH - Black Rook Hold\nDHT - Darkheart Thicket\nFALL - DOTI: Galakrond's Fall\nRISE - DOTI: Murozond's Rise\nEB - The Everbloom\nTOTT - Throne of the Tides\nWM - Waycrest Manner\n\n`;
+    const breakdownString = `\n\nExample string: \`aa 0t d hdd\`\n\`aa\` - Short form dungeon name\n\`0t\` - dungeon level + time or completion\n\`d\` - your role\n\`hdd\` - Required roles\n\nShort form Dungeon Names (not case-sensitive)\nAA - Algeth'ar Academy\nBH - Brackenhide Hollow\nHOI - Halls of Infusion\nNELT - Neltharus\nRLP - Ruby Life Pools\nAV - The Azure Vault\nNO - The Nokhud Offensive\nULD - Uldaman: Legacy of Tyr\n\n`;
     const invalidDungeonString = `Please enter a valid quick string.`;
     if (!reason) {
         reason = invalidDungeonString + breakdownString;

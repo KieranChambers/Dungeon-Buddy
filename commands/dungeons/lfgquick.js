@@ -88,8 +88,9 @@ module.exports = {
             const channelNameSplit = channelName.split("-");
             const lowerDifficultyRange = parseInt(channelNameSplit[1].replace("m", ""));
             const upperDifficultyRange =
-                lowerDifficultyRange === 21 ? 30 : parseInt(channelNameSplit[2].replace("m", ""));
+                lowerDifficultyRange === 0 ? 0 : parseInt(channelNameSplit[2].replace("m", ""));
 
+            const difficultyPrefix = lowerDifficultyRange === 0 ? "M" : "+";
             const dungeonDifficulty = parseInt(timeCompletionMatch[1], 10);
             if (dungeonDifficulty < lowerDifficultyRange || dungeonDifficulty > upperDifficultyRange) {
                 await invalidDungeonString(
@@ -111,7 +112,7 @@ module.exports = {
 
             const dungeonToRun = acronymToNameMap[dungeonAcronym.toUpperCase()];
             mainObject.embedData.dungeonName = dungeonToRun;
-            mainObject.embedData.dungeonDifficulty = `+${dungeonDifficulty}`;
+            mainObject.embedData.dungeonDifficulty = `${difficultyPrefix}${dungeonDifficulty}`;
 
             const timeOrCompletion = timeCompletionMatch[2].toUpperCase() === "C" ? "Completion" : "Time";
             mainObject.embedData.timeOrCompletion = timeOrCompletion;

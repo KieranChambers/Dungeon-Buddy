@@ -61,7 +61,8 @@ module.exports = {
         const channelName = currentChannel.name;
         const channelNameSplit = channelName.split("-");
         const lowerDifficultyRange = parseInt(channelNameSplit[1].replace("m", ""));
-        const upperDifficultyRange = lowerDifficultyRange === 21 ? 30 : parseInt(channelNameSplit[2].replace("m", ""));
+        const upperDifficultyRange = lowerDifficultyRange === 0 ? 0 : parseInt(channelNameSplit[2].replace("m", ""));
+        const difficultyPrefix = lowerDifficultyRange === 0 ? "M" : "+";
 
         // Make a list with dungeon difficulty ranges like +2, +3, +4
         const dungeonDifficultyRanges = [];
@@ -78,7 +79,7 @@ module.exports = {
                 .setMaxValues(1)
                 .addOptions(
                     dungeonDifficultyRanges.map((range) =>
-                        new StringSelectMenuOptionBuilder().setLabel(`+${range}`).setValue(`${range}`)
+                        new StringSelectMenuOptionBuilder().setLabel(`${difficultyPrefix}${range}`).setValue(`${range}`)
                     )
                 );
 
@@ -216,7 +217,7 @@ module.exports = {
 
             dungeonCollector.on("collect", async (i) => {
                 if (i.customId === "difficulty") {
-                    dungeonDifficulty = `+${i.values[0]}`;
+                    dungeonDifficulty = `${difficultyPrefix}${i.values[0]}`;
                     mainObject.embedData.dungeonDifficulty = dungeonDifficulty;
 
                     await i.deferUpdate();

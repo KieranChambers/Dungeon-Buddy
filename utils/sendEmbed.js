@@ -9,7 +9,7 @@ const {
 const { dungeonInstanceTable, interactionStatusTable } = require("./loadDb");
 const { processDungeonEmbed, getDungeonObject, getDungeonButtonRow, changeGroup } = require("./dungeonLogic");
 const { processSendEmbedError, createStatusEmbed } = require("./errorHandling");
-const { dungeonData } = require("./loadJson.js");
+const { dungeonData, currentExpansion, currentSeason } = require("./loadJson.js");
 
 async function sendEmbed(mainObject, channel, requiredCompositionList) {
     const { dungeonName, dungeonDifficulty } = mainObject.embedData;
@@ -186,6 +186,8 @@ async function sendEmbed(mainObject, channel, requiredCompositionList) {
                     dps: mainObject.roles.DPS.spots[0],
                     dps2: mainObject.roles.DPS.spots[1],
                     dps3: mainObject.roles.DPS.spots[2],
+                    expansion: currentExpansion,
+                    season: currentSeason,
                 });
 
                 // Update the interaction status to "finished" in the database

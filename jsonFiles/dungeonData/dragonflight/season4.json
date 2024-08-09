@@ -1,34 +1,26 @@
 {
     "Algeth'ar Academy": {
-        "acronym": "AA",
-        "wowheadStrategyUrl": "https://www.wowhead.com/guide/dungeons/algethar-academy-strategy"
+        "acronym": "AA"
     },
     "Brackenhide Hollow": {
-        "acronym": "BH",
-        "wowheadStrategyUrl": "https://www.wowhead.com/guide/dungeons/brackenhide-hollow-strategy"
+        "acronym": "BH"
     },
     "Halls of Infusion": {
-        "acronym": "HOI",
-        "wowheadStrategyUrl": "https://www.wowhead.com/guide/dungeons/halls-of-infusion-strategy"
+        "acronym": "HOI"
     },
     "Neltharus": {
-        "acronym": "NELT",
-        "wowheadStrategyUrl": "https://www.wowhead.com/guide/dungeons/neltharus-strategy"
+        "acronym": "NELT"
     },
     "Ruby Life Pools": {
-        "acronym": "RLP",
-        "wowheadStrategyUrl": "https://www.wowhead.com/guide/dungeons/ruby-life-pools-strategy"
+        "acronym": "RLP"
     },
     "The Azure Vault": {
-        "acronym": "AV",
-        "wowheadStrategyUrl": "https://www.wowhead.com/guide/dungeons/azure-vault-strategy"
+        "acronym": "AV"
     },
     "The Nokhud Offensive": {
-        "acronym": "NO",
-        "wowheadStrategyUrl": "https://www.wowhead.com/guide/dungeons/nokhud-offensive-strategy"
+        "acronym": "NO"
     },
     "Uldaman: Legacy of Tyr": {
-        "acronym": "ULD",
-        "wowheadStrategyUrl": "https://www.wowhead.com/guide/dungeons/uldaman-legacy-of-tyr-strategy"
+        "acronym": "ULD"
     }
 }

@@ -5,6 +5,7 @@ const {
     addUserToRole,
     userExistsInAnyRole,
     removeUserFromRole,
+    sendCancelMessage,
 } = require("./utilFunctions");
 const { dungeonInstanceTable, interactionStatusTable } = require("./loadDb");
 const { processDungeonEmbed, getDungeonObject, getDungeonButtonRow, changeGroup } = require("./dungeonLogic");
@@ -168,6 +169,9 @@ async function sendEmbed(mainObject, channel, requiredCompositionList) {
                     { interaction_status: "timeoutAfterCreation" },
                     { where: { interaction_id: mainObject.interactionId } }
                 );
+
+                // Send group timeout message to the group members
+                await sendCancelMessage(channel, mainObject, "timed out");
             } catch (e) {
                 processSendEmbedError(e, "Group creation timeout error", interactionUserId);
             }
@@ -201,14 +205,18 @@ async function sendEmbed(mainObject, channel, requiredCompositionList) {
         } else if (reason === "cancelledAfterCreation") {
             // Update the embed to reflect the cancellation
             try {
-                await createStatusEmbed("LFG cancelled by group creator.", sentEmbed);
-
                 // Update the interaction status to "cancelled" in the database
                 await interactionStatusTable.update(
                     { interaction_status: "cancelledAfterCreation" },
                     { where: { interaction_id: mainObject.interactionId } }
                 );
+
+                // Send a message to the group members that the group has been cancelled
+                await sendCancelMessage(channel, mainObject, "cancelled by group creator");
+
+                await sentEmbed.delete();
             } catch (e) {
+                console.log(e); // ! Remove this
                 processSendEmbedError(e, "Cancelled after creation error", interactionUserId);
             }
         }

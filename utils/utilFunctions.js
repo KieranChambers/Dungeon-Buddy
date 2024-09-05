@@ -1,5 +1,31 @@
 const { dungeonData } = require("./loadJson.js");
 
+const filterSpots = (spots, interactionUserId) => {
+    return spots.filter((member) => member !== interactionUserId && !member.includes("~~Filled Spot"));
+};
+
+async function sendCancelMessage(channel, mainObject, message) {
+    const interactionUserId = mainObject.interactionUser.userId;
+    const dungeonName = mainObject.embedData.dungeonName;
+    const dungeonDifficulty = mainObject.embedData.dungeonDifficulty;
+
+    // Only notify the other members that are not the interaction user
+    const membersToTag = [
+        ...filterSpots(mainObject.roles.Tank.spots, interactionUserId),
+        ...filterSpots(mainObject.roles.Healer.spots, interactionUserId),
+        ...filterSpots(mainObject.roles.DPS.spots, interactionUserId),
+    ];
+
+    // If there are no members to tag, return
+    if (membersToTag.length === 0) {
+        return;
+    }
+
+    await channel.send({
+        content: `${dungeonName} ${dungeonDifficulty} ${message} \n${membersToTag.join(" ")}`,
+    });
+}
+
 function generateRoleIcons(mainObject) {
     const roleIcons = [];
     for (const role in mainObject.roles) {
@@ -168,4 +194,5 @@ module.exports = {
     sendPassphraseToUser,
     removeUserFromRole,
     invalidDungeonString,
+    sendCancelMessage,
 };

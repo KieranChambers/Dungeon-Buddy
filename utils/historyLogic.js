@@ -7,6 +7,7 @@ function getPastDungeonObject(dungeonInstance) {
     const difficulty = dungeonValues.dungeon_difficulty;
     const timeCompletion = dungeonValues.timed_completed;
     const passphrase = dungeonValues.passphrase;
+    const groupCreator = dungeonValues.interaction_user;
     const tankId = dungeonValues.tank;
     const healerId = dungeonValues.healer;
     const dpsIds = [dungeonValues.dps, dungeonValues.dps2, dungeonValues.dps3]
@@ -18,8 +19,8 @@ function getPastDungeonObject(dungeonInstance) {
     let fields = [
         ...(creatorNotes ? [{ name: `"${creatorNotes}"`, value: ``, inline: false }] : []),
         { name: `Passphrase`, value: `\`${passphrase}\``, inline: true },
+        { name: `🚩 Creator`, value: `${groupCreator}`, inline: false },
         { name: `${tankEmoji} Tank `, value: `${tankId || "\u200b"}`, inline: false },
-
         { name: `${healerEmoji} Healer`, value: `${healerId || "\u200b"}`, inline: false },
         { name: `${dpsEmoji} DPS`, value: `${dpsIds || "\u200b"}`, inline: false },
     ];

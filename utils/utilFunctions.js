@@ -1,4 +1,14 @@
-const { dungeonData } = require("./loadJson.js");
+const { dungeonData, acronymToNameMap } = require("./loadJson.js");
+
+function stripListedAsNumbers(listedAs) {
+    // Define the regex pattern to match '+2' to '+50', with optional spaces
+    // const pattern = /\+\s*(?:[2-9]|[1-4][0-9]|50)\b|M\s*0\b/;
+    const pattern = /\+\s*((\d\s*){1,2}|\d{1,2})\b|M\s*0\b/;
+
+    // Replace the matched pattern with an empty string
+    const result = listedAs.replace(pattern, '').trim();
+    return result;
+}
 
 function generateRoleIcons(mainObject) {
     const roleIcons = [];
@@ -139,9 +149,11 @@ function addUserToRole(userId, userNickname, mainObject, newRole, typeOfCollecto
     }
 }
 
-// TODO: Pull the short forms in using the existing dungeon data JSON
 async function invalidDungeonString(interaction, reason) {
-    const breakdownString = `\n\nExample string: \`aa 0t d hdd\`\n\`aa\` - Short form dungeon name\n\`0t\` - dungeon level + time or completion\n\`d\` - your role\n\`hdd\` - Required roles\n\nShort form Dungeon Names (not case-sensitive)\nAA - Algeth'ar Academy\nBH - Brackenhide Hollow\nHOI - Halls of Infusion\nNELT - Neltharus\nRLP - Ruby Life Pools\nAV - The Azure Vault\nNO - The Nokhud Offensive\nULD - Uldaman: Legacy of Tyr\n\n`;
+    let breakdownString = `\n\nExample string: \`aa 0t d hdd\`\n\`aa\` - Short form dungeon name\n\`0t\` - dungeon level + time or completion\n\`d\` - your role\n\`hdd\` - Required roles\n\nShort form Dungeon Names (not case-sensitive)`
+    for (const acronym in acronymToNameMap) {
+        breakdownString += `\n ${acronym} - ${acronymToNameMap[acronym]}`;
+    }
     const invalidDungeonString = `Please enter a valid quick string.`;
     if (!reason) {
         reason = invalidDungeonString + breakdownString;
@@ -156,6 +168,7 @@ async function invalidDungeonString(interaction, reason) {
 }
 
 module.exports = {
+    stripListedAsNumbers,
     generateRoleIcons,
     generateListedAsString,
     generatePassphrase,

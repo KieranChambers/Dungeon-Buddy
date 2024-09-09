@@ -2,7 +2,7 @@ const { SlashCommandBuilder } = require("discord.js");
 
 const { acronymToNameMap } = require("../../utils/loadJson");
 const { getMainObject } = require("../../utils/getMainObject");
-const { invalidDungeonString } = require("../../utils/utilFunctions");
+const { stripListedAsNumbers, invalidDungeonString } = require("../../utils/utilFunctions");
 const { sendEmbed } = require("../../utils/sendEmbed");
 const { interactionStatusTable } = require("../../utils/loadDb");
 const { processError } = require("../../utils/errorHandling");
@@ -103,7 +103,10 @@ module.exports = {
             // Set the listed as group name/creator notes if applicable
             const listedAs = interaction.options.getString("listed_as");
             if (listedAs) {
-                mainObject.embedData.listedAs = listedAs;
+                const tempListedAs = stripListedAsNumbers(listedAs);
+                if (tempListedAs) {    
+                    mainObject.embedData.listedAs = tempListedAs;
+                }
             }
             const creatorNotes = interaction.options.getString("creator_notes");
             if (creatorNotes) {
@@ -183,7 +186,7 @@ module.exports = {
 
             // Reply to the interaction first then send the embed which catches any errors
             await interaction.reply({
-                content: `The passphrase for the dungeon is: \`${mainObject.utils.passphrase.phrase}\`\nLook out for NoP members applying with this in-game!`,
+                content: `**Please ensure applying members are __from NoP__ and __use the passphrase__ in-game!**\nThe passphrase for the dungeon is: \`${mainObject.utils.passphrase.phrase}\``,
                 ephemeral: true,
             });
 

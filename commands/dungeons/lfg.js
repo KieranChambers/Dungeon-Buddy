@@ -8,7 +8,7 @@ const {
 
 const { dungeonList } = require("../../utils/loadJson");
 const { getMainObject } = require("../../utils/getMainObject");
-const { isDPSRole } = require("../../utils/utilFunctions");
+const { stripListedAsNumbers, isDPSRole } = require("../../utils/utilFunctions");
 const { getEligibleComposition } = require("../../utils/dungeonLogic");
 const { sendEmbed } = require("../../utils/sendEmbed");
 const { interactionStatusTable } = require("../../utils/loadDb");
@@ -46,7 +46,10 @@ module.exports = {
         // Set the listed as group name/creator notes if the user specified one
         const listedAs = interaction.options.getString("listed_as");
         if (listedAs) {
-            mainObject.embedData.listedAs = listedAs;
+            const tempListedAs = stripListedAsNumbers(listedAs);
+            if (tempListedAs) {
+                mainObject.embedData.listedAs = tempListedAs;
+            }
         }
         const creatorNotes = interaction.options.getString("creator_notes");
         if (creatorNotes) {
@@ -323,8 +326,7 @@ module.exports = {
                         });
 
                         await i.update({
-                            content: `The passphrase for the dungeon is: \`${mainObject.utils.passphrase.phrase}\`\nLook out for NoP members applying with this in-game!`,
-                            ephemeral: true,
+                            content: `**Please ensure applying members are __from NoP__ and __use the passphrase__ in-game!**\nThe passphrase for the dungeon is: \`${mainObject.utils.passphrase.phrase}\``,
                             components: [],
                         });
 

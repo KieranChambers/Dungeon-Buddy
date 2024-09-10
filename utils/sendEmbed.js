@@ -216,7 +216,6 @@ async function sendEmbed(mainObject, channel, requiredCompositionList) {
 
                 await sentEmbed.delete();
             } catch (e) {
-                console.log(e); // ! Remove this
                 processSendEmbedError(e, "Cancelled after creation error", interactionUserId);
             }
         }

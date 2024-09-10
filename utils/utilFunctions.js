@@ -19,7 +19,7 @@ async function sendCancelMessage(channel, mainObject, message) {
     const dungeonName = mainObject.embedData.dungeonName;
     const dungeonDifficulty = mainObject.embedData.dungeonDifficulty;
 
-    const membersToTag = [];
+    let membersToTag = [];
 
     // Only notify the other members that are not the interaction user
     if (message === "cancelled by group creator") {

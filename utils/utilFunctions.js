@@ -6,7 +6,7 @@ function stripListedAsNumbers(listedAs) {
     const pattern = /\+\s*((\d\s*){1,2}|\d{1,2})\b|M\s*0\b/;
 
     // Replace the matched pattern with an empty string
-    const result = listedAs.replace(pattern, '').trim();
+    const result = listedAs.replace(pattern, "").trim();
     return result;
 }
 
@@ -19,12 +19,22 @@ async function sendCancelMessage(channel, mainObject, message) {
     const dungeonName = mainObject.embedData.dungeonName;
     const dungeonDifficulty = mainObject.embedData.dungeonDifficulty;
 
+    const membersToTag = [];
+
     // Only notify the other members that are not the interaction user
-    const membersToTag = [
-        ...filterSpots(mainObject.roles.Tank.spots, interactionUserId),
-        ...filterSpots(mainObject.roles.Healer.spots, interactionUserId),
-        ...filterSpots(mainObject.roles.DPS.spots, interactionUserId),
-    ];
+    if (message === "cancelled by group creator") {
+        membersToTag = [
+            ...filterSpots(mainObject.roles.Tank.spots, interactionUserId),
+            ...filterSpots(mainObject.roles.Healer.spots, interactionUserId),
+            ...filterSpots(mainObject.roles.DPS.spots, interactionUserId),
+        ];
+    } else {
+        membersToTag = [
+            ...mainObject.roles.Tank.spots,
+            ...mainObject.roles.Healer.spots,
+            ...mainObject.roles.DPS.spots,
+        ];
+    }
 
     // If there are no members to tag, return
     if (membersToTag.length === 0) {
@@ -178,7 +188,7 @@ function addUserToRole(userId, userNickname, mainObject, newRole, typeOfCollecto
 }
 
 async function invalidDungeonString(interaction, reason) {
-    let breakdownString = `\n\nExample string: \`aa 0t d hdd\`\n\`aa\` - Short form dungeon name\n\`0t\` - dungeon level + time or completion\n\`d\` - your role\n\`hdd\` - Required roles\n\nShort form Dungeon Names (not case-sensitive)`
+    let breakdownString = `\n\nExample string: \`aa 0t d hdd\`\n\`aa\` - Short form dungeon name\n\`0t\` - dungeon level + time or completion\n\`d\` - your role\n\`hdd\` - Required roles\n\nShort form Dungeon Names (not case-sensitive)`;
     for (const acronym in acronymToNameMap) {
         breakdownString += `\n ${acronym} - ${acronymToNameMap[acronym]}`;
     }

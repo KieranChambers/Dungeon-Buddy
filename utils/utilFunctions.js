@@ -6,7 +6,7 @@ function stripListedAsNumbers(listedAs) {
     const pattern = /\+\s*((\d\s*){1,2}|\d{1,2})\b|M\s*0\b/;
 
     // Replace the matched pattern with an empty string
-    const result = listedAs.replace(pattern, '').trim();
+    const result = listedAs.replace(pattern, "").trim();
     return result;
 }
 
@@ -93,7 +93,7 @@ function parseRolesToTag(difficulty, requiredComposition, guildId) {
     } else if (difficulty < 10) {
         roleDifficultyString = "-M7-9";
     } else {
-        roleDifficultyString = "M10";
+        roleDifficultyString = "-M10";
     }
 
     const globalRoles = global.roleMap.get(guildId);
@@ -178,7 +178,7 @@ function addUserToRole(userId, userNickname, mainObject, newRole, typeOfCollecto
 }
 
 async function invalidDungeonString(interaction, reason) {
-    let breakdownString = `\n\nExample string: \`aa 0t d hdd\`\n\`aa\` - Short form dungeon name\n\`0t\` - dungeon level + time or completion\n\`d\` - your role\n\`hdd\` - Required roles\n\nShort form Dungeon Names (not case-sensitive)`
+    let breakdownString = `\n\nExample string: \`aa 0t d hdd\`\n\`aa\` - Short form dungeon name\n\`0t\` - dungeon level + time or completion\n\`d\` - your role\n\`hdd\` - Required roles\n\nShort form Dungeon Names (not case-sensitive)`;
     for (const acronym in acronymToNameMap) {
         breakdownString += `\n ${acronym} - ${acronymToNameMap[acronym]}`;
     }

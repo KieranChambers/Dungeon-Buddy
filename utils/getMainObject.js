@@ -52,6 +52,7 @@ function getMainObject(interaction) {
             filledSpot: "~~Filled Spot~~",
             filledSpotCounter: 0,
             rolesToTag: "",
+            simpleSpots: [],
         },
         interactionId: interaction.id,
         interactionUser: {

@@ -19,12 +19,22 @@ async function sendCancelMessage(channel, mainObject, message) {
     const dungeonName = mainObject.embedData.dungeonName;
     const dungeonDifficulty = mainObject.embedData.dungeonDifficulty;
 
+    let membersToTag = [];
+
     // Only notify the other members that are not the interaction user
-    const membersToTag = [
-        ...filterSpots(mainObject.roles.Tank.spots, interactionUserId),
-        ...filterSpots(mainObject.roles.Healer.spots, interactionUserId),
-        ...filterSpots(mainObject.roles.DPS.spots, interactionUserId),
-    ];
+    if (message === "cancelled by group creator") {
+        membersToTag = [
+            ...filterSpots(mainObject.roles.Tank.spots, interactionUserId),
+            ...filterSpots(mainObject.roles.Healer.spots, interactionUserId),
+            ...filterSpots(mainObject.roles.DPS.spots, interactionUserId),
+        ];
+    } else {
+        membersToTag = [
+            ...mainObject.roles.Tank.spots,
+            ...mainObject.roles.Healer.spots,
+            ...mainObject.roles.DPS.spots,
+        ];
+    }
 
     // If there are no members to tag, return
     if (membersToTag.length === 0) {

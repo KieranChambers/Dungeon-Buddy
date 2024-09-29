@@ -63,8 +63,17 @@ module.exports = {
         const currentChannel = interaction.channel;
         const channelName = currentChannel.name;
         const channelNameSplit = channelName.split("-");
+        const isSingularKeyLevel = channelNameSplit.length === 2;
+
         const lowerDifficultyRange = parseInt(channelNameSplit[1].replace("m", ""));
-        const upperDifficultyRange = lowerDifficultyRange === 0 ? 0 : parseInt(channelNameSplit[2].replace("m", ""));
+
+        let upperDifficultyRange;
+        if (isSingularKeyLevel) {
+            upperDifficultyRange = lowerDifficultyRange;
+        } else {
+            upperDifficultyRange = parseInt(channelNameSplit[2].replace("m", ""));
+        }
+
         const difficultyPrefix = lowerDifficultyRange === 0 ? "M" : "+";
 
         // Make a list with dungeon difficulty ranges like +2, +3, +4

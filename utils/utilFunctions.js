@@ -1,3 +1,4 @@
+const { interactionStatusTable } = require("./loadDb.js");
 const { dungeonData, acronymToNameMap } = require("./loadJson.js");
 
 function stripListedAsNumbers(listedAs) {
@@ -10,8 +11,12 @@ function stripListedAsNumbers(listedAs) {
     return result;
 }
 
-const filterSpots = (spots, interactionUserId) => {
-    return spots.filter((member) => member !== interactionUserId && !member.includes("~~Filled Spot"));
+const filterSpots = (spots, interactionUserId, reason) => {
+    if (reason === "cancelled") {
+        return spots.filter((member) => member !== interactionUserId && !member.includes("~~Filled NoP Spot"));
+    } else {
+        return spots.filter((member) => member === interactionUserId && !member.includes("~~Filled NoP Spot"));
+    }
 };
 
 async function sendCancelMessage(channel, mainObject, message) {
@@ -24,15 +29,15 @@ async function sendCancelMessage(channel, mainObject, message) {
     // Only notify the other members that are not the interaction user
     if (message === "cancelled by group creator") {
         membersToTag = [
-            ...filterSpots(mainObject.roles.Tank.spots, interactionUserId),
-            ...filterSpots(mainObject.roles.Healer.spots, interactionUserId),
-            ...filterSpots(mainObject.roles.DPS.spots, interactionUserId),
+            ...filterSpots(mainObject.roles.Tank.spots, interactionUserId, "cancelled"),
+            ...filterSpots(mainObject.roles.Healer.spots, interactionUserId, "cancelled"),
+            ...filterSpots(mainObject.roles.DPS.spots, interactionUserId, "cancelled"),
         ];
     } else {
         membersToTag = [
-            ...mainObject.roles.Tank.spots,
-            ...mainObject.roles.Healer.spots,
-            ...mainObject.roles.DPS.spots,
+            ...filterSpots(mainObject.roles.Tank.spots, interactionUserId, "timed out"),
+            ...filterSpots(mainObject.roles.Healer.spots, interactionUserId, "timed out"),
+            ...filterSpots(mainObject.roles.DPS.spots, interactionUserId, "timed out"),
         ];
     }
 

@@ -17,8 +17,8 @@ Info:
 - A *hidden* passphrase is generated when you create a group. This is only available to you and the other members that join
 - The group creator can fill roles by clicking on the respective role button. This is good if you have a friend who is joining the group but is not on discord
 - Group members can change roles by clicking on another role
-- Group members can leave the group by clicking on the ❌ button
-- The group creator can cancel the group by clicking on the ❌ button and then clicking on \`Cancel Group\` 2x
+- Group members can leave the group by clicking on the ⚙️ button
+- The group creator can cancel the group by clicking on the ⚙️ button and then clicking on \`Cancel Group\` 2x
 - LFG times out after 30 mins if there is still available spots
 - Once a group is filled, the buttons will disappear after roughly 2 mins`;
 

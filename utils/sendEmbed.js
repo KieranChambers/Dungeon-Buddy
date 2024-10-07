@@ -133,7 +133,7 @@ async function sendEmbed(mainObject, channel, requiredCompositionList) {
                     ephemeral: true,
                 });
             }
-        } else if (i.customId === "cancelGroup") {
+        } else if (i.customId === "groupUtility") {
             if (!userExistsInAnyRole(discordUserId, mainObject)) {
                 await i.deferUpdate();
                 return;
@@ -160,7 +160,7 @@ async function sendEmbed(mainObject, channel, requiredCompositionList) {
         }
     });
 
-    groupUtilityCollector.on("end", async (collected, reason) => {
+    groupUtilityCollector.on("end", async (_, reason) => {
         if (reason === "time") {
             try {
                 await createStatusEmbed("Group creation timed out! (30 mins have passed).", sentEmbed);
@@ -176,8 +176,8 @@ async function sendEmbed(mainObject, channel, requiredCompositionList) {
                 processSendEmbedError(e, "Group creation timeout error", interactionUserId);
             }
         } else if (reason === "finished") {
-            // Send the finished dungeon data to the database
             try {
+                // Send the finished dungeon data to the database
                 await dungeonInstanceTable.create({
                     dungeon_name: mainObject.embedData.dungeonName,
                     dungeon_difficulty: mainObject.embedData.dungeonDifficulty,
@@ -199,11 +199,15 @@ async function sendEmbed(mainObject, channel, requiredCompositionList) {
                     { interaction_status: "finished" },
                     { where: { interaction_id: mainObject.interactionId } }
                 );
+
+                // Remove the components from the embed when the group is finished
+                await sentEmbed.edit({
+                    components: [],
+                });
             } catch (e) {
                 processSendEmbedError(e, "Finished processing error", interactionUserId);
             }
         } else if (reason === "cancelledAfterCreation") {
-            // Update the embed to reflect the cancellation
             try {
                 // Update the interaction status to "cancelled" in the database
                 await interactionStatusTable.update(
@@ -214,7 +218,11 @@ async function sendEmbed(mainObject, channel, requiredCompositionList) {
                 // Send a message to the group members that the group has been cancelled
                 await sendCancelMessage(channel, mainObject, "cancelled by group creator");
 
-                await sentEmbed.delete();
+                // Update the embed to show that the group has been cancelled
+                await sentEmbed.edit({
+                    content: `This group has been cancelled by the group creator.`,
+                    components: [],
+                });
             } catch (e) {
                 processSendEmbedError(e, "Cancelled after creation error", interactionUserId);
             }

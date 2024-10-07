@@ -41,6 +41,7 @@ function getEligibleComposition(mainObject) {
     return selectComposition;
 }
 
+let tempFinishedCollector = null;
 async function processDungeonEmbed(i, rolesToTag, dungeon, difficulty, mainObject, groupUtilityCollector, callUser) {
     // Acknowledge the interaction immediately if it has not been responded to
     if (!i.deferred && !i.replied) {
@@ -58,12 +59,28 @@ async function processDungeonEmbed(i, rolesToTag, dungeon, difficulty, mainObjec
 
     try {
         if (newDungeonObject.status === "full") {
-            await i.editReply({
+            const tempFinishedButtonRow = getTempFinishedButtonRow();
+
+            const tempFinishedMessage = await i.editReply({
                 content: messageContent,
                 embeds: [newDungeonObject],
-                components: [],
+                components: [tempFinishedButtonRow],
             });
-            groupUtilityCollector.stop("finished");
+
+            tempFinishedCollector = tempFinishedMessage.createMessageComponentCollector({
+                compontentType: ComponentType.Button,
+                time: 600_000, // Wait 10 minutes before timing out
+            });
+            tempFinishedCollector.on("end", async (_, reason) => {
+                if (reason === "time") {
+                    const newDungeonObject = getDungeonObject(dungeon, difficulty, mainObject);
+                    if (newDungeonObject.status === "full") {
+                        groupUtilityCollector.stop("finished");
+                    }
+                } else if (reason === "finished") {
+                    groupUtilityCollector.stop("finished");
+                }
+            });
         } else {
             await i.editReply({
                 content: messageContent,
@@ -167,9 +184,9 @@ function getDungeonButtonRow(mainObject) {
         disabled: false,
     });
 
-    const cancelGroupButton = createButton({
-        customId: "cancelGroup",
-        emoji: "❌",
+    const groupUtilityButton = createButton({
+        customId: "groupUtility",
+        label: "⚙️",
         style: ButtonStyle.Secondary,
         disabled: false,
     });
@@ -179,10 +196,23 @@ function getDungeonButtonRow(mainObject) {
         addHealerToGroup,
         addDpsToGroup,
         getPassphraseButton,
-        cancelGroupButton
+        groupUtilityButton
     );
 
     return embedButtonRow;
+}
+
+function getTempFinishedButtonRow() {
+    const groupUtilityButton = createButton({
+        customId: "groupUtility",
+        emoji: "⚙️",
+        style: ButtonStyle.Secondary,
+        disabled: false,
+    });
+
+    const tempFinishedButtonRow = new ActionRowBuilder().addComponents(groupUtilityButton);
+
+    return tempFinishedButtonRow;
 }
 
 function getGroupChangeUtilityRow(idNickRoleMapping, mainObject) {
@@ -241,7 +271,7 @@ function getGroupChangeConfirmRow() {
     const confirmGroupChangesButton = createButton({
         customId: "confirmGroupChanges",
         label: "Update Group",
-        style: ButtonStyle.Success,
+        style: ButtonStyle.Primary,
         disabled: false,
     });
 
@@ -259,10 +289,18 @@ function getGroupChangeConfirmRow() {
         disabled: false,
     });
 
+    const finishGroupButton = createButton({
+        customId: "finishGroup",
+        label: "Finish Group",
+        style: ButtonStyle.Success,
+        disabled: false,
+    });
+
     const groupChangeConfirmRow = new ActionRowBuilder().addComponents(
         confirmGroupChangesButton,
         abortGroupChangesButton,
-        cancelGroupButton
+        cancelGroupButton,
+        finishGroupButton
     );
 
     return groupChangeConfirmRow;
@@ -311,6 +349,11 @@ async function changeGroup(interaction, groupUtilityCollector, mainObject) {
         let cancelGroupCounter = 0;
 
         groupChangesCollector.on("collect", async (i) => {
+            const dungeonName = mainObject.embedData.dungeonName;
+            const dungeonDifficulty = mainObject.embedData.dungeonDifficulty;
+            const dungeonObject = getDungeonObject(dungeonName, dungeonDifficulty, mainObject);
+            const groupStatus = dungeonObject.status;
+
             if (i.customId === "removeGroupUsers") {
                 // Don't update the value if there's no users to remove
                 if (i.values[0] !== "none") {
@@ -325,30 +368,17 @@ async function changeGroup(interaction, groupUtilityCollector, mainObject) {
                 await i.deferUpdate();
             } else if (i.customId === "confirmGroupChanges") {
                 const rolesToTag = mainObject.embedData.rolesToTag;
-                const dungeonName = mainObject.embedData.dungeonName;
-                const dungeonDifficulty = mainObject.embedData.dungeonDifficulty;
                 const callUser = "existingUser";
 
+                // ! Will this cause an issue with the groupUtilityCollector?
                 // Check if the user has made any changes
                 if (!usersToRemove && !newGroupCreatorRole) {
                     await i.deferUpdate();
                     return;
                 }
 
-                const dungeonObject = getDungeonObject(dungeonName, dungeonDifficulty, mainObject);
-                const groupStatus = dungeonObject.status;
-
-                if (groupStatus === "full") {
-                    await i.update({
-                        content: "The group is full. No changes can be made.",
-                        ephemeral: true,
-                        components: [],
-                    });
-                    groupChangesCollector.stop("confirmGroupChanges");
-                    return;
-                }
-
                 // TODO: Change this so when the user wants to remove members they can choose to swap to that role
+                // ! BUG HERE if a user removes themselves from the group and then we try and remove them from the group it removes another user
                 if (usersToRemove) {
                     usersToRemove.forEach((userId) => {
                         const { nickname, role } = idNickRoleMapping[userId];
@@ -449,20 +479,34 @@ async function changeGroup(interaction, groupUtilityCollector, mainObject) {
                 }
                 cancelGroupCounter++;
                 await i.deferUpdate();
+            } else if (i.customId === "finishGroup") {
+                if (groupStatus !== "full") {
+                    i.deferUpdate();
+                } else {
+                    await i.update({
+                        content: "The group is now formed. Enjoy your dungeon!",
+                        ephemeral: true,
+                        components: [],
+                    });
+                    groupChangesCollector.stop("finishGroup");
+                }
             }
         });
 
-        groupChangesCollector.on("end", async (collected, reason) => {
+        groupChangesCollector.on("end", async (_, reason) => {
             if (reason === "time") {
                 interaction.followUp({
                     content:
-                        "The group utility view has expired (90s). Please click on ❌ to open the group utility again.",
+                        "The group utility view has expired (60s). Please click on ⚙️ to open the group utility again.",
                     ephemeral: true,
                     components: [],
                 });
             } else if (reason === "confirmCancelGroup") {
-                // Call the stop method to stop the main collector and cancel the group
+                // Call the stop method to stop the groupUtilityCollector and cancel the group
                 groupUtilityCollector.stop("cancelledAfterCreation");
+            } else if (reason === "finishGroup") {
+                // Call the stop method to stop the tempFinishedCollector and finish the group
+                tempFinishedCollector.stop("finished");
             }
         });
     } catch (e) {

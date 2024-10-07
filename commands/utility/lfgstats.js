@@ -101,7 +101,7 @@ module.exports = {
                 }
             });
 
-            popularKeyLevelCollector.on("end", async (collected, reason) => {
+            popularKeyLevelCollector.on("end", async (_, reason) => {
                 if (reason === "time") {
                     await userStatsEmbed.edit({
                         content: "LFG Stats timed out! (2 mins have passed).",

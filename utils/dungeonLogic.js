@@ -107,18 +107,27 @@ function getDungeonObject(dungeon, difficulty, mainObject) {
     const healer = mainObject.roles.Healer;
     const dps = mainObject.roles.DPS;
 
-    const tankNickname = tank.nicknames.join("\n");
-    const healerNickname = healer.nicknames.join("\n");
-    const dpsNicknames = dps.nicknames.join(`\n${dps.emoji} `);
-
     const tankEmoji = tank.emoji;
     const healerEmoji = healer.emoji;
     const dpsEmoji = dps.emoji;
 
+    const tankNickname = tank.nicknames.join("\n");
+    const healerNickname = healer.nicknames.join("\n");
+    let dpsNicknames = dps.nicknames;
+
+    const totalDps = 3;
+
+    // Fill with placeholders if there are fewer than 3 DPS members
+    const filledDpsEmojis = Array(totalDps).fill(dpsEmoji);
+    const filledDpsNicknames = dpsNicknames.concat(Array(totalDps - dpsNicknames.length).fill(" "));
+
+    // Generate a list with emojis and nicknames combined
+    const dpsList = filledDpsEmojis.map((emoji, index) => `${emoji} ${filledDpsNicknames[index]}`).join("\n");
+
     const roleIcons = generateRoleIcons(mainObject);
     const joinedRoleIcons = roleIcons.join(" ");
 
-    const roleFieldValue = `${tankEmoji} ${tankNickname}\n${healerEmoji} ${healerNickname}\n${dpsEmoji} ${dpsNicknames}`;
+    const roleFieldValue = `${tankEmoji} ${tankNickname}\n${healerEmoji} ${healerNickname}\n${dpsList}`;
 
     let fields = creatorNotes
         ? [
@@ -370,7 +379,6 @@ async function changeGroup(interaction, groupUtilityCollector, mainObject) {
                 const rolesToTag = mainObject.embedData.rolesToTag;
                 const callUser = "existingUser";
 
-                // ! Will this cause an issue with the groupUtilityCollector?
                 // Check if the user has made any changes
                 if (!usersToRemove && !newGroupCreatorRole) {
                     await i.deferUpdate();

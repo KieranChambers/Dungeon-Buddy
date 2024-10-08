@@ -1,4 +1,3 @@
-const { interactionStatusTable } = require("./loadDb.js");
 const { dungeonData, acronymToNameMap } = require("./loadJson.js");
 
 function stripListedAsNumbers(listedAs) {
@@ -10,6 +9,8 @@ function stripListedAsNumbers(listedAs) {
     const result = listedAs.replace(pattern, "").trim();
     return result;
 }
+
+const cleanFilledValues = (role) => (role.includes("~~Filled NoP Spot~~") ? role.slice(0, -1) : role);
 
 const filterSpots = (spots, interactionUserId, reason) => {
     if (reason === "cancelled") {
@@ -54,7 +55,7 @@ async function sendCancelMessage(channel, mainObject, message) {
 function generateRoleIcons(mainObject) {
     const roleIcons = [];
     for (const role in mainObject.roles) {
-        for (const spot in mainObject.roles[role].spots) {
+        for (const _ in mainObject.roles[role].spots) {
             roleIcons.push(mainObject.roles[role].emoji);
         }
     }
@@ -212,6 +213,7 @@ async function invalidDungeonString(interaction, reason) {
 
 module.exports = {
     stripListedAsNumbers,
+    cleanFilledValues,
     generateRoleIcons,
     generateListedAsString,
     generatePassphrase,

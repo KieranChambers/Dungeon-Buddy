@@ -1,5 +1,6 @@
 const { ComponentType } = require("discord.js");
 const {
+    cleanFilledValues,
     parseRolesToTag,
     generateListedAsString,
     addUserToRole,
@@ -177,6 +178,14 @@ async function sendEmbed(mainObject, channel, requiredCompositionList) {
             }
         } else if (reason === "finished") {
             try {
+                const tank = cleanFilledValues(mainObject.roles.Tank.spots[0]);
+                const healer = cleanFilledValues(mainObject.roles.Healer.spots[0]);
+                const dps = cleanFilledValues(mainObject.roles.DPS.spots[0]);
+                const dps2 = cleanFilledValues(mainObject.roles.DPS.spots[1]);
+                const dps3 = cleanFilledValues(mainObject.roles.DPS.spots[2]);
+
+                console.log("tank", tank, "healer", healer, "dps", dps, "dps2", dps2, "dps3", dps3);
+
                 // Send the finished dungeon data to the database
                 await dungeonInstanceTable.create({
                     dungeon_name: mainObject.embedData.dungeonName,
@@ -185,11 +194,11 @@ async function sendEmbed(mainObject, channel, requiredCompositionList) {
                     passphrase: mainObject.utils.passphrase.phrase,
                     interaction_user: mainObject.interactionUser.userId,
                     user_chosen_role: mainObject.interactionUser.userChosenRole,
-                    tank: mainObject.roles.Tank.spots[0],
-                    healer: mainObject.roles.Healer.spots[0],
-                    dps: mainObject.roles.DPS.spots[0],
-                    dps2: mainObject.roles.DPS.spots[1],
-                    dps3: mainObject.roles.DPS.spots[2],
+                    tank: tank,
+                    healer: healer,
+                    dps: dps,
+                    dps2: dps2,
+                    dps3: dps3,
                     expansion: currentExpansion,
                     season: currentSeason,
                 });
@@ -206,6 +215,7 @@ async function sendEmbed(mainObject, channel, requiredCompositionList) {
                 });
             } catch (e) {
                 processSendEmbedError(e, "Finished processing error", interactionUserId);
+                console.log(e);
             }
         } else if (reason === "cancelledAfterCreation") {
             try {

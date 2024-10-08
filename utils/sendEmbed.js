@@ -184,8 +184,6 @@ async function sendEmbed(mainObject, channel, requiredCompositionList) {
                 const dps2 = cleanFilledValues(mainObject.roles.DPS.spots[1]);
                 const dps3 = cleanFilledValues(mainObject.roles.DPS.spots[2]);
 
-                console.log("tank", tank, "healer", healer, "dps", dps, "dps2", dps2, "dps3", dps3);
-
                 // Send the finished dungeon data to the database
                 await dungeonInstanceTable.create({
                     dungeon_name: mainObject.embedData.dungeonName,

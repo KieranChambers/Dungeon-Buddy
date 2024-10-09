@@ -79,9 +79,17 @@ async function processDungeonEmbed(i, rolesToTag, dungeon, difficulty, mainObjec
                     }
                 } else if (reason === "finished") {
                     groupUtilityCollector.stop("finished");
+                } else if (reason === "groupInProgress") {
+                    // Reset the tempFinishedCollector to null once the group is in progress again
+                    tempFinishedCollector = null;
                 }
             });
         } else {
+            // Check for tempFinishedCollector and stop it if it exists
+            if (tempFinishedCollector) {
+                tempFinishedCollector.stop("groupInProgress");
+            }
+
             await i.editReply({
                 content: messageContent,
                 embeds: [newDungeonObject],
@@ -228,7 +236,7 @@ function getGroupChangeUtilityRow(idNickRoleMapping, mainObject) {
     const groupCreatorRole = mainObject.interactionUser.userChosenRole;
 
     const nicknames = Object.entries(idNickRoleMapping)
-        .filter(([userId, _]) => userId !== mainObject.interactionUser.userId)
+        .filter(([userId]) => userId !== mainObject.interactionUser.userId)
         .map(([userId, { nickname, role }]) => {
             return {
                 label: nickname,

@@ -16,7 +16,7 @@ const filterSpots = (spots, interactionUserId, reason) => {
     if (reason === "cancelled") {
         return spots.filter((member) => member !== interactionUserId && !member.includes("~~Filled NoP Spot"));
     } else {
-        return spots.filter((member) => member === interactionUserId && !member.includes("~~Filled NoP Spot"));
+        return spots.filter((member) => !member.includes("~~Filled NoP Spot"));
     }
 };
 

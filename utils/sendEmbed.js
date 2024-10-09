@@ -147,7 +147,8 @@ async function sendEmbed(mainObject, channel, requiredCompositionList) {
                 } else {
                     const [roleName, roleData] = userExistsInAnyRole(discordUserId, mainObject);
                     removeUserFromRole(discordUserId, discordNickname, mainObject, roleName, roleData);
-                    groupStatus = await processDungeonEmbed(
+
+                    await processDungeonEmbed(
                         i,
                         rolesToTag,
                         dungeonName,

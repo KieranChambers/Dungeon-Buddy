@@ -111,7 +111,7 @@ async function loadStats() {
         .then((res) => res.map((dungeon) => dungeon.dataValues));
 
     // Most popular keys in each bracket
-    for (key in key_levels) {
+    for (const key in key_levels) {
         const result = await sequelize.query(popularKeysQuery, {
             replacements: { key_levels: key_levels[key] },
             type: Sequelize.QueryTypes.SELECT,

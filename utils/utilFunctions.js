@@ -54,10 +54,12 @@ async function sendCancelMessage(channel, mainObject, message) {
 
 function generateRoleIcons(mainObject) {
     const roleIcons = [];
-    for (const role in mainObject.roles) {
-        for (const _ in mainObject.roles[role].spots) {
+
+    const roleKeys = Object.keys(mainObject.roles).slice(0, 3);
+    for (const role of roleKeys) {
+        mainObject.roles[role].spots.forEach(() => {
             roleIcons.push(mainObject.roles[role].emoji);
-        }
+        });
     }
 
     return roleIcons;

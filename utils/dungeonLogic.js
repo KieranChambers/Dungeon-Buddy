@@ -335,7 +335,7 @@ function buildIdNickRoleMapping(mainObject) {
 async function changeGroup(interaction, groupUtilityCollector, mainObject) {
     try {
         // Map user IDs to their nicknames and roles
-        const idNickRoleMapping = buildIdNickRoleMapping(mainObject);
+        let idNickRoleMapping = buildIdNickRoleMapping(mainObject);
 
         const [groupRemoveUserRow, groupChangeRoleRow] = getGroupChangeUtilityRow(idNickRoleMapping, mainObject);
         const groupChangeConfirmRow = getGroupChangeConfirmRow();
@@ -386,14 +386,20 @@ async function changeGroup(interaction, groupUtilityCollector, mainObject) {
                 }
 
                 // TODO: Change this so when the user wants to remove members they can choose to swap to that role
-                // ! BUG HERE if a user removes themselves from the group and then we try and remove them from the group it removes another user
                 if (usersToRemove) {
+                    // Update the idNickRoleMapping to make sure the member hasn't left already
+                    idNickRoleMapping = buildIdNickRoleMapping(mainObject);
+
                     usersToRemove.forEach((userId) => {
-                        const { nickname, role } = idNickRoleMapping[userId];
                         try {
+                            if (!idNickRoleMapping[userId]) {
+                                return;
+                            }
+
+                            const { nickname, role } = idNickRoleMapping[userId];
                             removeUserFromRole(userId, nickname, mainObject, role, mainObject.roles[role]);
                         } catch (e) {
-                            console.log("Error removing user from role:", error);
+                            console.log("Error removing user from role:", e);
                         }
                     });
                     // Reset the users to remove to null after processing to avoid errors

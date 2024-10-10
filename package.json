@@ -1,6 +1,5 @@
 {
     "dependencies": {
-        "main": "index.js",
         "discord.js": "^14.14.1",
         "dotenv": "^16.3.1",
         "sequelize": "^6.35.1",

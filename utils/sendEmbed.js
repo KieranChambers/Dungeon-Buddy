@@ -163,6 +163,12 @@ async function sendEmbed(mainObject, channel, requiredCompositionList) {
     });
 
     groupUtilityCollector.on("end", async (_, reason) => {
+        const tank = mainObject.roles.Tank.spots[0] ? cleanFilledValues(mainObject.roles.Tank.spots[0]) : "";
+        const healer = mainObject.roles.Healer.spots[0] ? cleanFilledValues(mainObject.roles.Healer.spots[0]) : "";
+        const dps = mainObject.roles.DPS.spots[0] ? cleanFilledValues(mainObject.roles.DPS.spots[0]) : "";
+        const dps2 = mainObject.roles.DPS.spots[1] ? cleanFilledValues(mainObject.roles.DPS.spots[1]) : "";
+        const dps3 = mainObject.roles.DPS.spots[2] ? cleanFilledValues(mainObject.roles.DPS.spots[2]) : "";
+
         if (reason === "time") {
             try {
                 await createStatusEmbed("Group creation timed out! (30 mins have passed).", sentEmbed);
@@ -179,12 +185,6 @@ async function sendEmbed(mainObject, channel, requiredCompositionList) {
             }
         } else if (reason === "finished") {
             try {
-                const tank = cleanFilledValues(mainObject.roles.Tank.spots[0]);
-                const healer = cleanFilledValues(mainObject.roles.Healer.spots[0]);
-                const dps = cleanFilledValues(mainObject.roles.DPS.spots[0]);
-                const dps2 = cleanFilledValues(mainObject.roles.DPS.spots[1]);
-                const dps3 = cleanFilledValues(mainObject.roles.DPS.spots[2]);
-
                 // Send the finished dungeon data to the database
                 await dungeonInstanceTable.create({
                     dungeon_name: mainObject.embedData.dungeonName,
@@ -200,13 +200,8 @@ async function sendEmbed(mainObject, channel, requiredCompositionList) {
                     dps3: dps3,
                     expansion: currentExpansion,
                     season: currentSeason,
+                    reason: reason,
                 });
-
-                // Update the interaction status to "finished" in the database
-                await interactionStatusTable.update(
-                    { interaction_status: "finished" },
-                    { where: { interaction_id: mainObject.interactionId } }
-                );
 
                 // Remove the components from the embed when the group is finished
                 await sentEmbed.edit({
@@ -218,11 +213,22 @@ async function sendEmbed(mainObject, channel, requiredCompositionList) {
             }
         } else if (reason === "cancelledAfterCreation") {
             try {
-                // Update the interaction status to "cancelled" in the database
-                await interactionStatusTable.update(
-                    { interaction_status: "cancelledAfterCreation" },
-                    { where: { interaction_id: mainObject.interactionId } }
-                );
+                await dungeonInstanceTable.create({
+                    dungeon_name: mainObject.embedData.dungeonName,
+                    dungeon_difficulty: mainObject.embedData.dungeonDifficulty,
+                    timed_completed: mainObject.embedData.timeOrCompletion,
+                    passphrase: mainObject.utils.passphrase.phrase,
+                    interaction_user: mainObject.interactionUser.userId,
+                    user_chosen_role: mainObject.interactionUser.userChosenRole,
+                    tank: tank,
+                    healer: healer,
+                    dps: dps,
+                    dps2: dps2,
+                    dps3: dps3,
+                    expansion: currentExpansion,
+                    season: currentSeason,
+                    reason: reason,
+                });
 
                 // Send a message to the group members that the group has been cancelled
                 await sendCancelMessage(channel, mainObject, "cancelled by group creator");

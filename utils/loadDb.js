@@ -66,6 +66,10 @@ const dungeonInstanceTable = sequelize.define("dungeoninstances", {
         type: Sequelize.INTEGER,
         allowNull: true,
     },
+    reason: {
+        type: Sequelize.STRING,
+        allowNull: true,
+    },
 });
 
 const errorTable = sequelize.define("errors", {
@@ -113,6 +117,7 @@ const interactionStatusTable = sequelize.define("interaction_status", {
 });
 
 function syncTables() {
+    // Never set force to true in a production environment as it will drop all tables
     sequelize.sync({ force: false });
 }
 

@@ -196,7 +196,9 @@ function addUserToRole(userId, userNickname, mainObject, newRole, typeOfCollecto
 }
 
 async function invalidDungeonString(interaction, reason) {
-    let breakdownString = `\n\nExample string: \`aa 0t d hdd\`\n\`aa\` - Short form dungeon name\n\`0t\` - dungeon level + time or completion\n\`d\` - your role\n\`hdd\` - Required roles\n\nShort form Dungeon Names (not case-sensitive)`;
+    let breakdownString = `\n\nExample string: \`${Object.keys(
+        acronymToNameMap
+    )[0].toLowerCase()} 0t d hdd\`\n\`aa\` - Short form dungeon name\n\`0t\` - dungeon level + time or completion\n\`d\` - your role\n\`hdd\` - Required roles\n\nShort form Dungeon Names (not case-sensitive)`;
     for (const acronym in acronymToNameMap) {
         breakdownString += `\n ${acronym} - ${acronymToNameMap[acronym]}`;
     }

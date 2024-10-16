@@ -356,7 +356,7 @@ module.exports = {
                 }
             });
 
-            dungeonCollector.on("end", async (collected, reason) => {
+            dungeonCollector.on("end", async (_, reason) => {
                 if (reason === "time") {
                     await dungeonResponse.edit({
                         content: "LFG timed out! Please use /lfg again to create a new group.",

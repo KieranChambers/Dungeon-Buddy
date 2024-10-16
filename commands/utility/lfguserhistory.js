@@ -62,7 +62,9 @@ module.exports = {
                         .setLabel(
                             `${dungeon.dataValues.dungeon_name} ${
                                 dungeon.dataValues.dungeon_difficulty
-                            } - ${dungeon.dataValues.createdAt.toLocaleString("en-GB", timeOptions)}`
+                            } - ${dungeon.dataValues.createdAt.toLocaleString("en-GB", timeOptions)} ${
+                                dungeon.dataValues.reason === "finished" ? "✅" : "❌"
+                            }`
                         )
                         .setValue(position.toString())
                 )
@@ -84,7 +86,7 @@ module.exports = {
             });
 
             const pastDungeonValue = getPastDungeonValue.values[0];
-            const pastDungeonObject = getPastDungeonObject(userDungeonInstances[pastDungeonValue]);
+            const pastDungeonObject = getPastDungeonObject(userDungeonInstances[pastDungeonValue], timeOptions);
 
             await getPastDungeonValue.update({
                 embeds: [pastDungeonObject],

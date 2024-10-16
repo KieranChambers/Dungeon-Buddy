@@ -41,7 +41,7 @@ module.exports = {
             }
 
             const dungeonAcronym = quickStringParts[0];
-            if (!acronymToNameMap.hasOwnProperty(dungeonAcronym.toUpperCase())) {
+            if (!Object.prototype.hasOwnProperty.call(acronymToNameMap, dungeonAcronym.toUpperCase())) {
                 await invalidDungeonString(interaction, "**You entered an invalid dungeon acronym.**");
                 return;
             }
@@ -72,7 +72,7 @@ module.exports = {
             roleCounts[userRole.toLowerCase()] += 1;
 
             for (const char of requiredRoles.toLowerCase()) {
-                if (roleCounts.hasOwnProperty(char)) {
+                if (Object.prototype.hasOwnProperty.call(roleCounts, char)) {
                     roleCounts[char] += 1;
                 }
             }

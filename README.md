@@ -26,3 +26,18 @@ Example quick string: `fall 10t d hdd`
 
 `/lfgstats` - check total groups created, groups created in the last 24h, 7d, 30d & also the most popular dungeons for
 each key range.
+
+## License
+
+This project is licensed under the [CC BY-NC 4.0 License](https://creativecommons.org/licenses/by-nc/4.0/).
+
+### Conditions
+
+-   You **must credit** the original author in any fork, modification, or usage of this project by adding the following
+    to your Discord bot description:
+    > Original code by Baddadan/Kashual for NoP EU. GitHub: https://bit.ly/3ZrVj7C
+-   This code **cannot** be used in any product that is sold for money or restricted by a paywall. This includes Discord
+    member sections
+
+If you have questions about the licensing terms, please contact me at the [No Pressure](https://discord.gg/nopressureeu)
+discord server.

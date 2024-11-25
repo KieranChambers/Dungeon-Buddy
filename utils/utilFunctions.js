@@ -10,8 +10,14 @@ function stripListedAsNumbers(listedAs) {
     return result;
 }
 
-const filterSpots = (spots, interactionUserId) => {
-    return spots.filter((member) => member !== interactionUserId && !member.includes("~~Filled Spot"));
+const cleanFilledValues = (role) => (role.includes("~~Filled NoP Spot~~") ? role.slice(0, -1) : role);
+
+const filterSpots = (spots, interactionUserId, reason) => {
+    if (reason === "cancelled") {
+        return spots.filter((member) => member !== interactionUserId && !member.includes("~~Filled NoP Spot"));
+    } else {
+        return spots.filter((member) => !member.includes("~~Filled NoP Spot"));
+    }
 };
 
 async function sendCancelMessage(channel, mainObject, message) {
@@ -24,15 +30,15 @@ async function sendCancelMessage(channel, mainObject, message) {
     // Only notify the other members that are not the interaction user
     if (message === "cancelled by group creator") {
         membersToTag = [
-            ...filterSpots(mainObject.roles.Tank.spots, interactionUserId),
-            ...filterSpots(mainObject.roles.Healer.spots, interactionUserId),
-            ...filterSpots(mainObject.roles.DPS.spots, interactionUserId),
+            ...filterSpots(mainObject.roles.Tank.spots, interactionUserId, "cancelled"),
+            ...filterSpots(mainObject.roles.Healer.spots, interactionUserId, "cancelled"),
+            ...filterSpots(mainObject.roles.DPS.spots, interactionUserId, "cancelled"),
         ];
     } else {
         membersToTag = [
-            ...mainObject.roles.Tank.spots,
-            ...mainObject.roles.Healer.spots,
-            ...mainObject.roles.DPS.spots,
+            ...filterSpots(mainObject.roles.Tank.spots, interactionUserId, "timed out"),
+            ...filterSpots(mainObject.roles.Healer.spots, interactionUserId, "timed out"),
+            ...filterSpots(mainObject.roles.DPS.spots, interactionUserId, "timed out"),
         ];
     }
 
@@ -48,10 +54,12 @@ async function sendCancelMessage(channel, mainObject, message) {
 
 function generateRoleIcons(mainObject) {
     const roleIcons = [];
-    for (const role in mainObject.roles) {
-        for (const spot in mainObject.roles[role].spots) {
+
+    const roleKeys = Object.keys(mainObject.roles).slice(0, 3);
+    for (const role of roleKeys) {
+        mainObject.roles[role].spots.forEach(() => {
             roleIcons.push(mainObject.roles[role].emoji);
-        }
+        });
     }
 
     return roleIcons;
@@ -188,7 +196,9 @@ function addUserToRole(userId, userNickname, mainObject, newRole, typeOfCollecto
 }
 
 async function invalidDungeonString(interaction, reason) {
-    let breakdownString = `\n\nExample string: \`aa 0t d hdd\`\n\`aa\` - Short form dungeon name\n\`0t\` - dungeon level + time or completion\n\`d\` - your role\n\`hdd\` - Required roles\n\nShort form Dungeon Names (not case-sensitive)`;
+    let breakdownString = `\n\nExample string: \`${Object.keys(
+        acronymToNameMap
+    )[0].toLowerCase()} 0t d hdd\`\n\`aa\` - Short form dungeon name\n\`0t\` - dungeon level + time or completion\n\`d\` - your role\n\`hdd\` - Required roles\n\nShort form Dungeon Names (not case-sensitive)`;
     for (const acronym in acronymToNameMap) {
         breakdownString += `\n ${acronym} - ${acronymToNameMap[acronym]}`;
     }
@@ -207,6 +217,7 @@ async function invalidDungeonString(interaction, reason) {
 
 module.exports = {
     stripListedAsNumbers,
+    cleanFilledValues,
     generateRoleIcons,
     generateListedAsString,
     generatePassphrase,

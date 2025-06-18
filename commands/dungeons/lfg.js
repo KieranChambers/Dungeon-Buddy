@@ -106,9 +106,9 @@ module.exports = {
                 .setMinValues(1)
                 .setMaxValues(1)
                 .addOptions(
-                    new StringSelectMenuOptionBuilder().setLabel("Time or abandon").setValue("timeorabandon"),
-                    new StringSelectMenuOptionBuilder().setLabel("Time but complete").setValue("timebutcomplete"),
-                    new StringSelectMenuOptionBuilder().setLabel("Vault completion").setValue("vaultcompletion")
+                    new StringSelectMenuOptionBuilder().setLabel("Time or abandon").setValue("TimeOrAbandon"),
+                    new StringSelectMenuOptionBuilder().setLabel("Time but complete").setValue("TimeButComplete"),
+                    new StringSelectMenuOptionBuilder().setLabel("Vault completion").setValue("VaultCompletion")
                 );
 
             const timeCompletionRow = new ActionRowBuilder().addComponents(getTimeCompletion);

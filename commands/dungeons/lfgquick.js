@@ -126,10 +126,10 @@ module.exports = {
 
             const timeOrCompletion =
                 timeCompletionMatch[2].toUpperCase() === "TBC"
-                    ? "timebutcomplete"
+                    ? "TimeButComplete"
                     : timeCompletionMatch[2].toUpperCase() === "TOA"
-                    ? "timeorabandon"
-                    : "vaultcompletion";
+                    ? "TimeOrAbandon"
+                    : "VaultCompletion";
             mainObject.embedData.timeOrCompletion = timeOrCompletion;
 
             // Add the user's chosen role to the main object so it's easily accessible

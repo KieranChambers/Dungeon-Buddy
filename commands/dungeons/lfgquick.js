@@ -47,7 +47,7 @@ module.exports = {
             }
 
             const levelAndRunType = quickStringParts[1];
-            const timeCompletionMatch = levelAndRunType.match(/(\d+)(c|t)/i);
+            const timeCompletionMatch = levelAndRunType.match(/(\d+)(tbc|toa|vc)/i);
             if (!timeCompletionMatch) {
                 await invalidDungeonString(interaction, "**Invalid time or completion.**");
                 return;
@@ -124,7 +124,12 @@ module.exports = {
             mainObject.embedData.dungeonName = dungeonToRun;
             mainObject.embedData.dungeonDifficulty = `${difficultyPrefix}${dungeonDifficulty}`;
 
-            const timeOrCompletion = timeCompletionMatch[2].toUpperCase() === "C" ? "Completion" : "Time";
+            const timeOrCompletion =
+                timeCompletionMatch[2].toUpperCase() === "TBC"
+                    ? "TimeButComplete"
+                    : timeCompletionMatch[2].toUpperCase() === "TOA"
+                    ? "TimeOrAbandon"
+                    : "VaultCompletion";
             mainObject.embedData.timeOrCompletion = timeOrCompletion;
 
             // Add the user's chosen role to the main object so it's easily accessible

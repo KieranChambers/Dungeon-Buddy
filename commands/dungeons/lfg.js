@@ -106,8 +106,9 @@ module.exports = {
                 .setMinValues(1)
                 .setMaxValues(1)
                 .addOptions(
-                    new StringSelectMenuOptionBuilder().setLabel("Time").setValue("Time"),
-                    new StringSelectMenuOptionBuilder().setLabel("Completion").setValue("Completion")
+                    new StringSelectMenuOptionBuilder().setLabel("Time or abandon").setValue("TimeOrAbandon"),
+                    new StringSelectMenuOptionBuilder().setLabel("Time but complete").setValue("TimeButComplete"),
+                    new StringSelectMenuOptionBuilder().setLabel("Vault completion").setValue("VaultCompletion")
                 );
 
             const timeCompletionRow = new ActionRowBuilder().addComponents(getTimeCompletion);
@@ -171,7 +172,7 @@ module.exports = {
 
         // Temporary storage for dropdown values
         let dungeonDifficultyPlaceholder = "Select a difficulty";
-        let timeOrCompletionPlaceholder = "Time/Completion?";
+        let timeOrCompletionPlaceholder = "Time/Abandon/Completion?";
         let userChosenRolePlaceholder = "Select your role";
         let dungeonCompositionPlaceholder = "Select your composition";
 

@@ -46,7 +46,7 @@ module.exports = {
                 new StringSelectMenuOptionBuilder().setLabel("M2-M3").setValue("key_levels_two"),
                 new StringSelectMenuOptionBuilder().setLabel("M4-M6").setValue("key_levels_three"),
                 new StringSelectMenuOptionBuilder().setLabel("M7-M9").setValue("key_levels_four"),
-                new StringSelectMenuOptionBuilder().setLabel("M10").setValue("key_levels_five")
+                new StringSelectMenuOptionBuilder().setLabel("M10-M11").setValue("key_levels_five")
             );
 
         const getKeyLevelRow = new ActionRowBuilder().addComponents(selectKeyLevelRow);
@@ -62,7 +62,7 @@ module.exports = {
             key_levels_two: "M2-M3",
             key_levels_three: "M4-M6",
             key_levels_four: "M7-M9",
-            key_levels_five: "M10",
+            key_levels_five: "M10-M11",
         };
 
         const userFilter = (i) => i.user.id === interaction.user.id;

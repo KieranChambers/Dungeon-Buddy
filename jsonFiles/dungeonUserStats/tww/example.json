@@ -1,0 +1,65 @@
+{
+    "dungeonGroupsCreated": { "total": 31927, "today": 2, "weekly": 2, "monthly": 2 },
+    "mostPopularDungeons": [
+        { "dungeon_name": "Mists of Tirna Scithe", "count": 1662 },
+        { "dungeon_name": "The Necrotic Wake", "count": 1527 },
+        { "dungeon_name": "Siege of Boralus", "count": 1323 },
+        { "dungeon_name": "Ara-Kara, City of Echoes", "count": 1277 },
+        { "dungeon_name": "The Stonevault", "count": 1087 },
+        { "dungeon_name": "Grim Batol", "count": 1059 },
+        { "dungeon_name": "The Dawnbreaker", "count": 1038 },
+        { "dungeon_name": "City of Threads", "count": 1005 }
+    ],
+    "mostPopularKeys": {
+        "key_levels_one": [
+            { "dungeon_name": "Ara-Kara, City of Echoes", "dungeon_difficulty": "M0", "count": 363 },
+            { "dungeon_name": "The Stonevault", "dungeon_difficulty": "M0", "count": 262 },
+            { "dungeon_name": "Grim Batol", "dungeon_difficulty": "M0", "count": 226 },
+            { "dungeon_name": "Mists of Tirna Scithe", "dungeon_difficulty": "M0", "count": 225 },
+            { "dungeon_name": "The Necrotic Wake", "dungeon_difficulty": "M0", "count": 191 },
+            { "dungeon_name": "City of Threads", "dungeon_difficulty": "M0", "count": 172 },
+            { "dungeon_name": "The Dawnbreaker", "dungeon_difficulty": "M0", "count": 165 },
+            { "dungeon_name": "Siege of Boralus", "dungeon_difficulty": "M0", "count": 129 }
+        ],
+        "key_levels_two": [
+            { "dungeon_name": "Mists of Tirna Scithe", "dungeon_difficulty": "+2", "count": 265 },
+            { "dungeon_name": "The Necrotic Wake", "dungeon_difficulty": "+2", "count": 250 },
+            { "dungeon_name": "Siege of Boralus", "dungeon_difficulty": "+2", "count": 221 },
+            { "dungeon_name": "Ara-Kara, City of Echoes", "dungeon_difficulty": "+2", "count": 167 },
+            { "dungeon_name": "The Dawnbreaker", "dungeon_difficulty": "+2", "count": 161 },
+            { "dungeon_name": "Grim Batol", "dungeon_difficulty": "+2", "count": 152 },
+            { "dungeon_name": "City of Threads", "dungeon_difficulty": "+2", "count": 143 },
+            { "dungeon_name": "The Stonevault", "dungeon_difficulty": "+2", "count": 135 }
+        ],
+        "key_levels_three": [
+            { "dungeon_name": "The Necrotic Wake", "dungeon_difficulty": "+4", "count": 222 },
+            { "dungeon_name": "Mists of Tirna Scithe", "dungeon_difficulty": "+6", "count": 210 },
+            { "dungeon_name": "Siege of Boralus", "dungeon_difficulty": "+4", "count": 171 },
+            { "dungeon_name": "Ara-Kara, City of Echoes", "dungeon_difficulty": "+4", "count": 142 },
+            { "dungeon_name": "City of Threads", "dungeon_difficulty": "+4", "count": 141 },
+            { "dungeon_name": "The Dawnbreaker", "dungeon_difficulty": "+4", "count": 140 },
+            { "dungeon_name": "Grim Batol", "dungeon_difficulty": "+5", "count": 137 },
+            { "dungeon_name": "The Stonevault", "dungeon_difficulty": "+4", "count": 133 }
+        ],
+        "key_levels_four": [
+            { "dungeon_name": "Mists of Tirna Scithe", "dungeon_difficulty": "+7", "count": 165 },
+            { "dungeon_name": "The Necrotic Wake", "dungeon_difficulty": "+7", "count": 154 },
+            { "dungeon_name": "Siege of Boralus", "dungeon_difficulty": "+7", "count": 128 },
+            { "dungeon_name": "Ara-Kara, City of Echoes", "dungeon_difficulty": "+7", "count": 115 },
+            { "dungeon_name": "Grim Batol", "dungeon_difficulty": "+7", "count": 105 },
+            { "dungeon_name": "City of Threads", "dungeon_difficulty": "+7", "count": 99 },
+            { "dungeon_name": "The Stonevault", "dungeon_difficulty": "+7", "count": 97 },
+            { "dungeon_name": "The Dawnbreaker", "dungeon_difficulty": "+8", "count": 92 }
+        ],
+        "key_levels_five": [
+            { "dungeon_name": "Mists of Tirna Scithe", "dungeon_difficulty": "+10", "count": 32 },
+            { "dungeon_name": "Siege of Boralus", "dungeon_difficulty": "+10", "count": 25 },
+            { "dungeon_name": "The Dawnbreaker", "dungeon_difficulty": "+10", "count": 24 },
+            { "dungeon_name": "The Necrotic Wake", "dungeon_difficulty": "+10", "count": 24 },
+            { "dungeon_name": "Ara-Kara, City of Echoes", "dungeon_difficulty": "+10", "count": 21 },
+            { "dungeon_name": "The Stonevault", "dungeon_difficulty": "+10", "count": 19 },
+            { "dungeon_name": "City of Threads", "dungeon_difficulty": "+10", "count": 18 },
+            { "dungeon_name": "Grim Batol", "dungeon_difficulty": "+10", "count": 13 }
+        ]
+    }
+}

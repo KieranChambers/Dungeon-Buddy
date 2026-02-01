@@ -118,7 +118,7 @@ const interactionStatusTable = sequelize.define("interaction_status", {
 
 function syncTables() {
     // Never set force to true in a production environment as it will drop all tables
-    sequelize.sync({ force: false });
+    return sequelize.sync({ force: false });
 }
 
 module.exports = { syncTables, dungeonInstanceTable, errorTable, interactionStatusTable, sequelize };

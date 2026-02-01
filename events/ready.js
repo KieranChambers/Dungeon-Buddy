@@ -7,8 +7,8 @@ const updateInterval = 1_800_000;
 module.exports = {
     name: Events.ClientReady,
     once: true,
-    execute(client) {
-        syncTables();
+    async execute(client) {
+        await syncTables();
         console.log(`Ready! Logged in as ${client.user.tag}`);
 
         client.guilds.cache.forEach((guild) => {

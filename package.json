@@ -1,4 +1,15 @@
 {
+    "name": "dungeon-buddy",
+    "version": "1.0.0",
+    "description": "Discord bot for World of Warcraft dungeon group management",
+    "main": "index.js",
+    "scripts": {
+        "start": "node index.js",
+        "deploy-commands": "node deploy-commands.js"
+    },
+    "engines": {
+        "node": ">=18.0.0"
+    },
     "dependencies": {
         "discord.js": "^14.14.1",
         "dotenv": "^16.3.1",

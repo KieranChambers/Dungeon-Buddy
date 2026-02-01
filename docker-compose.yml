@@ -1,0 +1,10 @@
+services:
+  bot:
+    build: .
+    env_file: .env
+    volumes:
+      - ./data:/app/data
+    restart: unless-stopped
+    environment:
+      # Default to development mode (can be overridden in .env)
+      NODE_ENV: ${NODE_ENV:-development}

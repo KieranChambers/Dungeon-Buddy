@@ -1,0 +1,32 @@
+# Dependencies
+node_modules
+
+# Environment files
+.env
+
+# Git
+.git
+.gitignore
+
+# Documentation
+*.md
+README.md
+LICENSE
+
+# Data
+*.sqlite
+data/
+
+# Config files
+.prettierrc
+eslint.config.mjs
+nodemon.json
+
+# VSCode
+.vscode
+
+# MacOS
+.DS_Store
+
+# Old files
+oldCommands/

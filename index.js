@@ -1,7 +1,8 @@
 const fs = require("fs");
 const path = require("path");
 const { Client, Collection, GatewayIntentBits } = require("discord.js");
-const { token } = require("./config");
+const { token, clientId, guildId } = require("./config");
+const { deployCommands } = require("./utils/deployCommands");
 
 // Initialize a global map to store roles
 global.roleMap = new Map();
@@ -43,4 +44,15 @@ for (const file of eventFiles) {
     }
 }
 
-client.login(token);
+// Deploy commands before logging in
+(async () => {
+    try {
+        await deployCommands(token, clientId, guildId);
+    } catch (error) {
+        console.error("Failed to deploy commands:", error);
+        process.exit(1);
+    }
+    
+    // Login to Discord after commands are deployed
+    client.login(token);
+})();
